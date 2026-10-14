@@ -1,13 +1,8 @@
 import { directionFromRegion, directionToRegion } from './regions.js'
 
-// Направление позиции корзины: товар едет из своего региона,
-// подарочный набор — в регион назначения
 export function itemDirection(item) {
     return item.type === 'giftBox' ? directionToRegion(item.destination) : directionFromRegion(item.region)
 }
-
-// Позиции корзины — «снимки» товаров: цена, вес и срок годности на момент добавления.
-// Перед оформлением корзина сверяется с сервером (SYNC_PRODUCTS).
 
 export function makeProductItem(product) {
     return {
@@ -26,7 +21,6 @@ export function makeProductItem(product) {
     }
 }
 
-// Набор «Север + Юг» — одна позиция: цена и вес = сумма содержимого
 export function makeGiftBoxItem(products, destination, key = `GB-${Date.now()}`, qty = 1) {
     const contents = products.map((p) => ({
         productId: p.id,
@@ -53,7 +47,6 @@ export function makeGiftBoxItem(products, destination, key = `GB-${Date.now()}`,
     }
 }
 
-// Позиции в формате API заказа: сервер сам подставит цены и вес из базы
 export function toOrderItems(items) {
     return items.map((item) =>
         item.type === 'giftBox'

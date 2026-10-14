@@ -1,26 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { getCart, saveCart } from '../api/account'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { itemDirection, makeGiftBoxItem, makeProductItem } from '../utils/cart'
 import { calcWeightKg } from '../utils/delivery'
 import { DIRECTIONS, REGIONS } from '../utils/regions'
-import { readJSON, writeJSON } from '../utils/storage'
+import { readJSON, removeKey, writeJSON } from '../utils/storage'
+import { useAuth } from './AuthContext'
 import { useToast } from './ToastContext'
 
-// Корзина «Сладкого моста».
-//
-// Главное правило: все позиции корзины едут ОДНОЙ волной, т.е. в одном направлении.
-// Обычный товар едет из своего региона (Якутия → YKT_DNR), подарочный набор
-// «Север + Юг» — в регион назначения. Поэтому в корзине хранится direction,
-// а попытка добавить позицию другого направления открывает ConfirmDialog.
-//
-// Состояние: { items, direction, waveId, thermoChosen }
-// Позиция-товар:  { key: id товара, type: 'product', productId, name, region, ..., qty }
-// Позиция-набор:  { key: 'GB-…', type: 'giftBox', destination, contents: [...], ..., qty }
-
 const STORAGE_KEY = 'sweet-bridge:cart'
+const PENDING_KEY = 'sweet-bridge:pending-cart-item'
+const PENDING_TTL_MS = 30 * 60 * 1000
+const SAVE_DELAY_MS = 400
 const MAX_QTY = 99
 
-const initialState = { items: [], direction: null, waveId: null, thermoChosen: false }
+const initialState = { items: [], direction: null, waveId: null, thermoChosen: false, consent: false }
 
 const clampQty = (qty) => Math.min(MAX_QTY, Math.max(1, Math.round(Number(qty)) || 1))
 
@@ -28,7 +23,6 @@ function cartReducer(state, action) {
     switch (action.type) {
         case 'ADD': {
             const direction = itemDirection(action.item)
-            // Защита от ошибки вызова: другое направление сюда попадать не должно
             if (state.direction && state.items.length && direction !== state.direction) return state
 
             const existing = state.items.find((i) => i.key === action.item.key)
@@ -69,13 +63,18 @@ function cartReducer(state, action) {
         case 'CLEAR':
             return initialState
 
+        case 'LOAD':
+            return action.state
+
         case 'SET_WAVE':
             return { ...state, waveId: action.waveId }
 
         case 'SET_THERMO':
             return { ...state, thermoChosen: Boolean(action.value) }
 
-        // Актуализация цен/веса по данным сервера; исчезнувшие товары удаляются
+        case 'SET_CONSENT':
+            return { ...state, consent: Boolean(action.value) }
+
         case 'SYNC_PRODUCTS': {
             const byId = new Map(action.products.map((p) => [p.id, p]))
             const items = state.items
@@ -99,10 +98,6 @@ function cartReducer(state, action) {
     }
 }
 
-// --- Восстановление из localStorage ------------------------------------------
-// Всё, что не похоже на корректную корзину, молча отбрасываем — битые данные
-// не должны ломать приложение.
-
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0
 const isStr = (v) => typeof v === 'string' && v.length > 0
 
@@ -122,8 +117,7 @@ function isValidItem(item) {
     return item.type === 'product' && isStr(item.productId) && Boolean(REGIONS[item.region])
 }
 
-function loadCart() {
-    const saved = readJSON(localStorage, STORAGE_KEY, null)
+function parseCart(saved) {
     if (!saved || !Array.isArray(saved.items)) return initialState
 
     const valid = saved.items
@@ -131,7 +125,6 @@ function loadCart() {
         .map((item) => ({ ...item, temp_sensitive: Boolean(item.temp_sensitive), qty: clampQty(item.qty) }))
     if (valid.length === 0) return initialState
 
-    // Если каким-то образом смешались направления — оставляем первое
     const direction = itemDirection(valid[0])
     const items = valid.filter((item) => itemDirection(item) === direction)
 
@@ -140,21 +133,46 @@ function loadCart() {
         direction,
         waveId: isStr(saved.waveId) ? saved.waveId : null,
         thermoChosen: saved.thermoChosen === true,
+        consent: saved.consent === true,
     }
 }
 
-// --- Контекст -----------------------------------------------------------------
+function takeLegacyCart() {
+    const legacy = parseCart(readJSON(localStorage, STORAGE_KEY, null))
+    removeKey(localStorage, STORAGE_KEY)
+    return legacy
+}
+
+function takePendingItem() {
+    const saved = readJSON(sessionStorage, PENDING_KEY, null)
+    removeKey(sessionStorage, PENDING_KEY)
+
+    const fresh = saved && Date.now() - Number(saved.savedAt) < PENDING_TTL_MS
+    if (!fresh || !isValidItem(saved.item)) return null
+
+    return { item: { ...saved.item, temp_sensitive: Boolean(saved.item.temp_sensitive) }, qty: clampQty(saved.qty) }
+}
 
 const CartContext = createContext(null)
 
 export function CartProvider({ children }) {
-    const [state, dispatch] = useReducer(cartReducer, undefined, loadCart)
+    const [state, dispatch] = useReducer(cartReducer, initialState)
     const [pending, setPending] = useState(null)
     const { showToast } = useToast()
+    const { token, user, checking, forget } = useAuth()
+    const navigate = useNavigate()
+    const location = useLocation()
 
-    useEffect(() => {
-        writeJSON(localStorage, STORAGE_KEY, state)
-    }, [state])
+    const userId = user?.id ?? null
+    const [syncedFor, setSyncedFor] = useState(null)
+    const [cartOwner, setCartOwner] = useState(token)
+    const syncing = Boolean(token) && (checking || syncedFor !== userId)
+
+    if (cartOwner !== token) {
+        setCartOwner(token)
+        dispatch({ type: 'CLEAR' })
+        setSyncedFor(null)
+    }
 
     const notifyAdded = useCallback(
         (item) => {
@@ -164,10 +182,50 @@ export function CartProvider({ children }) {
         [showToast]
     )
 
-    // Добавление с проверкой направления. Возвращает Promise<boolean>:
-    // true — позиция добавлена, false — пользователь отказался очищать корзину.
+    useEffect(() => {
+        if (!token || !userId) return undefined
+
+        const controller = new AbortController()
+        getCart(token, controller.signal)
+            .then(({ cart }) => {
+                const fromServer = parseCart(cart)
+                const legacy = takeLegacyCart()
+                const loaded = fromServer.items.length === 0 && legacy.items.length > 0 ? legacy : fromServer
+                dispatch({ type: 'LOAD', state: loaded })
+                setSyncedFor(userId)
+
+                const added = takePendingItem()
+                if (!added) return
+                if (loaded.items.length > 0 && loaded.direction !== itemDirection(added.item)) {
+                    setPending({ ...added, resolve: () => {} })
+                } else {
+                    dispatch({ type: 'ADD', item: added.item, qty: added.qty })
+                    notifyAdded(added.item)
+                }
+            })
+            .catch((error) => {
+                if (error.name === 'AbortError') return
+                if (error.status === 401) forget()
+                else showToast('Не удалось загрузить корзину из аккаунта. Обновите страницу', { type: 'error' })
+            })
+
+        return () => controller.abort()
+    }, [token, userId, forget, notifyAdded, showToast])
+
+    useEffect(() => {
+        if (!token || !userId || syncedFor !== userId) return undefined
+
+        const timer = setTimeout(() => {
+            saveCart(token, state).catch((error) => {
+                if (error.status === 401) forget()
+            })
+        }, SAVE_DELAY_MS)
+
+        return () => clearTimeout(timer)
+    }, [state, token, userId, syncedFor, forget])
+
     const hasItems = state.items.length > 0
-    const addItem = useCallback(
+    const putItem = useCallback(
         (item, qty = 1) =>
             new Promise((resolve) => {
                 const conflict = hasItems && state.direction !== itemDirection(item)
@@ -182,6 +240,20 @@ export function CartProvider({ children }) {
                 resolve(true)
             }),
         [hasItems, state.direction, notifyAdded]
+    )
+
+    const addItem = useCallback(
+        (item, qty = 1) => {
+            if (token && !syncing) return putItem(item, qty)
+
+            writeJSON(sessionStorage, PENDING_KEY, { item, qty, savedAt: Date.now() })
+            if (token) return Promise.resolve(true)
+
+            const next = encodeURIComponent(`${location.pathname}${location.search}`)
+            navigate(`/account?reason=cart&next=${next}`)
+            return Promise.resolve(false)
+        },
+        [token, syncing, putItem, location.pathname, location.search, navigate]
     )
 
     const confirmReplace = () => {
@@ -207,6 +279,7 @@ export function CartProvider({ children }) {
             clear: () => dispatch({ type: 'CLEAR' }),
             setWave: (waveId) => dispatch({ type: 'SET_WAVE', waveId }),
             setThermo: (value) => dispatch({ type: 'SET_THERMO', value }),
+            setConsent: (value) => dispatch({ type: 'SET_CONSENT', value }),
             syncProducts: (products) => dispatch({ type: 'SYNC_PRODUCTS', products }),
         }),
         [addItem]
@@ -219,11 +292,12 @@ export function CartProvider({ children }) {
         return {
             ...state,
             ...actions,
+            syncing,
             count,
             goodsTotal,
             weightKg: calcWeightKg(state.items),
         }
-    }, [state, actions])
+    }, [state, actions, syncing])
 
     return (
         <CartContext.Provider value={value}>

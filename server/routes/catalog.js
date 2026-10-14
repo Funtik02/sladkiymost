@@ -1,7 +1,8 @@
 const express = require('express')
 const db = require('../db')
 const HttpError = require('../lib/httpError')
-const { filterProducts, parseRegion, uniqueSorted } = require('../lib/products')
+const { filterProducts, getSoldCounts, parseRegion, uniqueSorted } = require('../lib/products')
+const { searchProducts } = require('../lib/search')
 const { DIRECTIONS, parseDirection } = require('../lib/waves')
 
 const router = express.Router()
@@ -9,6 +10,12 @@ const router = express.Router()
 router.get('/products', async (req, res) => {
     const [products, orders] = await Promise.all([db.read('products'), db.read('orders')])
     res.json(filterProducts(products, orders, req.query))
+})
+
+router.get('/search', async (req, res) => {
+    const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 0, 0), 50)
+    const [products, orders] = await Promise.all([db.read('products'), db.read('orders')])
+    res.json(searchProducts(products, getSoldCounts(orders), req.query.q, limit))
 })
 
 router.get('/products/:id', async (req, res) => {
@@ -36,7 +43,6 @@ router.get('/manufacturers', async (req, res) => {
     res.json(uniqueSorted(products.map((p) => p.manufacturer)))
 })
 
-// Пункты выдачи в городе назначения: ?direction=YKT_DNR → Донецк
 router.get('/pickup-points', async (req, res) => {
     const direction = parseDirection(req.query.direction)
     const points = await db.read('pickup-points')

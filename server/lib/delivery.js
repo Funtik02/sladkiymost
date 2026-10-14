@@ -1,7 +1,3 @@
-// Расчёт доставки на сервере — копия client/src/utils/delivery.js.
-// Клиент считает для мгновенного показа, сервер пересчитывает при создании
-// заказа и сумме с клиента не доверяет. Меняете формулу — меняйте в обоих файлах.
-
 const { getSeason, getMonthFromISO } = require('./season')
 
 const TARIFF_PER_KG = 500
@@ -11,7 +7,6 @@ const THERMO_PRICE = 150
 const BASE_DELIVERY_DAYS = { min: 10, max: 14 }
 const SHELF_LIFE_RESERVE_DAYS = 7
 
-// Скидка на тариф за заполненность волны (сравнение строгое: «больше 50 %»)
 const DISCOUNT_TIERS = [
     { fill: 0.8, discount: 0.35 },
     { fill: 0.5, discount: 0.2 },
@@ -19,7 +14,6 @@ const DISCOUNT_TIERS = [
 
 const roundTo = (value, digits) => Math.round(value * 10 ** digits) / 10 ** digits
 
-// items: [{ weight_g, qty }] → вес в кг с точностью до грамма
 function calcWeightKg(items) {
     const grams = items.reduce((sum, item) => sum + item.weight_g * item.qty, 0)
     return roundTo(grams / 1000, 3)
@@ -42,7 +36,6 @@ function getDeliveryDays(month) {
     }
 }
 
-// Срок годности должен покрывать максимальный срок доставки + 7 дней запаса
 function getRequiredShelfLifeDays(month) {
     return getDeliveryDays(month).max + SHELF_LIFE_RESERVE_DAYS
 }
@@ -51,8 +44,6 @@ function isShelfLifeOk(shelfLifeDays, month) {
     return shelfLifeDays >= getRequiredShelfLifeDays(month)
 }
 
-// доставка = вес_кг × 500 × (1 − скидка) + термоупаковка,
-// заполненность = (текущий вес волны + вес заказа) / 300. Суммы — в целых рублях.
 function calcDelivery({ items, wave, thermoChosen = false }) {
     const month = getMonthFromISO(wave.departureDate)
     const maxKg = wave.maxWeightKg || MAX_WAVE_KG

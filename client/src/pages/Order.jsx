@@ -3,29 +3,25 @@ import { Link, useParams } from 'react-router-dom'
 import { getOrder } from '../api/orders'
 import ErrorMessage from '../components/ErrorMessage'
 import GiftCardPreview from '../components/GiftCardPreview'
-import { RefreshIcon } from '../components/Icons'
+import { GiftIcon, RefreshIcon } from '../components/Icons'
 import Loader from '../components/Loader'
 import RegionBadge from '../components/RegionBadge'
 import StatusTimeline from '../components/StatusTimeline'
+import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useFetch } from '../hooks/useFetch'
 import { formatDate, formatDateRange, formatDateTime, formatKg, formatRub } from '../utils/format'
 import { DIRECTIONS, ORDER_STATUS_LABELS, WAVE_STATUS_LABELS } from '../utils/regions'
-import { rememberOrder } from '../utils/storage'
 
 export default function Order() {
+    const { isLoggedIn } = useAuth()
     const { id } = useParams()
     const { showToast } = useToast()
     const { data: order, error, loading, reload } = useFetch((signal) => getOrder(id, signal), [id])
 
     useDocumentTitle(`Заказ №${id}`)
 
-    useEffect(() => {
-        if (order) rememberOrder(order.id)
-    }, [order])
-
-    // После нажатия «Обновить статус» сообщаем о результате
     const refreshing = useRef(false)
     const handleRefresh = () => {
         refreshing.current = true
@@ -55,8 +51,8 @@ export default function Order() {
                     <div className="state">
                         <p className="state__title">Заказ №{id} не найден</p>
                         <p className="state__text">Проверьте номер — он состоит из 6 цифр и есть на странице оформления.</p>
-                        <Link to="/track" className="btn btn--primary">
-                            Ввести другой номер
+                        <Link to={isLoggedIn ? '/track' : '/'} className="btn btn--primary">
+                            {isLoggedIn ? 'Ввести другой номер' : 'На главную'}
                         </Link>
                     </div>
                 ) : (
@@ -72,7 +68,7 @@ export default function Order() {
     return (
         <div className="container section">
             <nav className="breadcrumbs" aria-label="Хлебные крошки">
-                <Link to="/track">Отслеживание</Link>
+                {isLoggedIn ? <Link to="/track">Отслеживание</Link> : <Link to="/">Главная</Link>}
                 <span aria-hidden="true">/</span>
                 <span aria-current="page">Заказ №{order.id}</span>
             </nav>
@@ -179,7 +175,7 @@ export default function Order() {
                             <li key={item.productId ?? `box-${index}`} className="order-items__row">
                                 <div>
                                     <p className="order-items__name">
-                                        {item.type === 'giftBox' ? '🎁 ' : ''}
+                                        {item.type === 'giftBox' && <GiftIcon size={16} className="inline-icon" />}
                                         {item.name} × {item.qty}
                                     </p>
                                     {item.type === 'giftBox' ? (

@@ -3,7 +3,6 @@ const { DIRECTIONS, byDeparture, isAccepting, parseDirection, publicWave, withSy
 
 const router = express.Router()
 
-// Ближайшие открытые волны (приём заказов ещё идёт)
 router.get('/waves', async (req, res) => {
     const direction = parseDirection(req.query.direction)
     const { waves } = await withSyncedState()
@@ -16,7 +15,6 @@ router.get('/waves', async (req, res) => {
     )
 })
 
-// Загрузка ближайших волн в обоих направлениях — для дашборда
 router.get('/waves/load', async (req, res) => {
     const { waves } = await withSyncedState()
     const result = {}

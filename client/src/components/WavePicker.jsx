@@ -3,7 +3,6 @@ import { formatDate, formatDateRange, formatKg, formatPercent } from '../utils/f
 import { getWaveSeason } from '../utils/season'
 import WaveLoadBar from './WaveLoadBar'
 
-// Список открытых волн направления с выбором (radio)
 export default function WavePicker({ waves, items, selectedId, onSelect }) {
     return (
         <fieldset className="wave-picker">
@@ -37,7 +36,7 @@ export default function WavePicker({ waves, items, selectedId, onSelect }) {
                                         {calc.discount > 0 && !blocker && (
                                             <span className="tag tag--red">−{calc.discount * 100} % на доставку</span>
                                         )}
-                                        {season.key === 'offseason' && <span className="tag tag--brown">межсезонье +7 дней</span>}
+                                        {season.key === 'offseason' && <span className="tag tag--gold">межсезонье +7 дней</span>}
                                         {season.thermoRequired && <span className="tag tag--blue">{season.label.toLowerCase()}: термоупаковка</span>}
                                     </span>
                                     <span className="wave-option__meta">

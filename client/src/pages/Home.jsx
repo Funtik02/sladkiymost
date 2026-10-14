@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { BoxIcon, CartIcon, GiftIcon, SnowflakeIcon, SunIcon, TrendDownIcon } from '../components/Icons'
 import { getProducts } from '../api/products'
 import { getWavesLoad } from '../api/waves'
 import ErrorMessage from '../components/ErrorMessage'
@@ -10,10 +11,10 @@ import { useFetch } from '../hooks/useFetch'
 import { DIRECTION_CODES, REGIONS } from '../utils/regions'
 
 const STEPS = [
-    { icon: '🛒', title: 'Выбираете сладости', text: 'Конфеты ЯХК из Якутска или вафли и мармелад из Донецка — в одной корзине товары одного региона.' },
-    { icon: '📦', title: 'Заказ попадает в волну', text: 'Волна — сборная партия, которая уходит раз в 14 дней. Приём заказов закрывается за 3 дня до отправки.' },
-    { icon: '📉', title: 'Чем полнее волна — тем дешевле', text: 'Базовый тариф 500 ₽/кг. Волна заполнена больше чем на 50 % — скидка 20 %, больше чем на 80 % — 35 %.' },
-    { icon: '🎁', title: 'Забираете на пункте выдачи', text: 'Через 10–14 дней после отправки заказ ждёт вас в пункте выдачи в Якутске или Донецке.' },
+    { Icon: CartIcon, title: 'Выбираете сладости', text: 'Конфеты ЯХК из Якутска или вафли и мармелад из Донецка — в одной корзине товары одного региона.' },
+    { Icon: BoxIcon, title: 'Заказ попадает в волну', text: 'Волна — сборная партия, которая уходит раз в 14 дней. Приём заказов закрывается за 3 дня до отправки.' },
+    { Icon: TrendDownIcon, title: 'Чем полнее волна — тем дешевле', text: 'Базовый тариф 500 ₽/кг. Волна заполнена больше чем на 50 % — скидка 20 %, больше чем на 80 % — 35 %.' },
+    { Icon: GiftIcon, title: 'Забираете на пункте выдачи', text: 'Через 10–14 дней после отправки заказ ждёт вас в пункте выдачи в Якутске или Донецке.' },
 ]
 
 function PopularProducts() {
@@ -76,23 +77,35 @@ export default function Home() {
 
     return (
         <>
-            <section className="hero">
-                <div className="container hero__inner">
-                    <p className="hero__eyebrow">Маркетплейс сладостей двух регионов</p>
-                    <h1 className="hero__title">
-                        Сладкий мост: <span className="hero__north">Якутия</span> ⇄{' '}
-                        <span className="hero__south">Донбасс</span>
-                    </h1>
-                    <p className="hero__text">
-                        Конфеты, пряники и торты из Якутска едут в Донецк, а вафли, мармелад и шоколад из Донецка — в
-                        Якутск. Заказы собираются в общие партии-волны: вместе везти дешевле, а чем полнее волна, тем
-                        ниже цена доставки для каждого.
-                    </p>
-                    <div className="hero__actions">
-                        <Link to="/waves" className="btn btn--light">
+            <section className="hero" aria-labelledby="hero-title">
+                <h1 id="hero-title" className="visually-hidden">
+                    Сладкий мост: Якутия ⇄ Донбасс — вкус, который объединяет
+                </h1>
+                <img
+                    className="hero__image"
+                    src="/hero.jpg"
+                    alt="Сладкий мост. Якутия и Донбасс — вкус, который объединяет"
+                    width="1312"
+                    height="400"
+                    fetchPriority="high"
+                />
+            </section>
+
+            <section className="hero-intro">
+                <div className="container hero-intro__inner">
+                    <div>
+                        <p className="hero-intro__eyebrow">Маркетплейс сладостей двух регионов</p>
+                        <p className="hero-intro__text">
+                            Конфеты, пряники и торты из Якутска едут в Донецк, а вафли, мармелад и шоколад из Донецка —
+                            в Якутск. Заказы собираются в общие партии-волны: вместе везти дешевле, а чем полнее волна,
+                            тем ниже цена доставки для каждого.
+                        </p>
+                    </div>
+                    <div className="hero-intro__actions">
+                        <Link to="/waves" className="btn btn--primary">
                             Как загружены волны
                         </Link>
-                        <Link to="/gift-box" className="btn btn--outline-light">
+                        <Link to="/gift-box" className="btn btn--primary">
                             Собрать набор «Север + Юг»
                         </Link>
                     </div>
@@ -105,9 +118,7 @@ export default function Home() {
                 </h2>
                 <div className="showcases">
                     <Link to="/catalog/yakutia" className="showcase showcase--yakutia">
-                        <span className="showcase__emoji" aria-hidden="true">
-                            ❄🍫
-                        </span>
+                        <SnowflakeIcon className="showcase__icon" size={36} strokeWidth="1.6" />
                         <span className="showcase__title">Сладости Якутии</span>
                         <span className="showcase__text">
                             Конфеты, шоколад, пряники, зефир и торты фабрики ЯХК. Едут волной «Якутия → ДНР».
@@ -115,9 +126,7 @@ export default function Home() {
                         <span className="showcase__cta">Открыть витрину →</span>
                     </Link>
                     <Link to="/catalog/donbass" className="showcase showcase--donbass">
-                        <span className="showcase__emoji" aria-hidden="true">
-                            ☀🧇
-                        </span>
+                        <SunIcon className="showcase__icon" size={36} strokeWidth="1.6" />
                         <span className="showcase__title">Сладости Донбасса</span>
                         <span className="showcase__text">
                             Вафли, мармелад, печенье и конфеты донецких производителей. Едут волной «ДНР → Якутия».
@@ -147,9 +156,7 @@ export default function Home() {
                     {STEPS.map((step, index) => (
                         <li key={step.title} className="step">
                             <span className="step__number">{index + 1}</span>
-                            <span className="step__icon" aria-hidden="true">
-                                {step.icon}
-                            </span>
+                            <step.Icon className="step__icon" size={30} strokeWidth="1.6" />
                             <h3 className="step__title">{step.title}</h3>
                             <p className="step__text">{step.text}</p>
                         </li>

@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { getOrder } from '../api/orders'
 import ErrorMessage from '../components/ErrorMessage'
@@ -9,17 +8,14 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useFetch } from '../hooks/useFetch'
 import { formatDate, formatDateRange, formatRub } from '../utils/format'
 import { DIRECTIONS } from '../utils/regions'
-import { rememberOrder } from '../utils/storage'
 
 async function copyText(text) {
     try {
         await navigator.clipboard.writeText(text)
         return
     } catch {
-        // API нет или браузер запретил доступ к буферу — пробуем запасной способ
     }
 
-    // Запасной вариант для старых браузеров, http без защищённого контекста и встроенных окон
     const area = document.createElement('textarea')
     area.value = text
     area.setAttribute('readonly', '')
@@ -38,15 +34,10 @@ export default function OrderSuccess() {
     const { showToast } = useToast()
     const stateOrder = location.state?.order?.id === id ? location.state.order : null
 
-    // Сразу после оформления заказ уже есть в state; при перезагрузке страницы — загружаем
     const fetched = useFetch((signal) => (stateOrder ? Promise.resolve(stateOrder) : getOrder(id, signal)), [id])
     const order = fetched.data
 
     useDocumentTitle(`Заказ №${id} оформлен`)
-
-    useEffect(() => {
-        if (order) rememberOrder(order.id)
-    }, [order])
 
     if (fetched.loading && !order) {
         return (

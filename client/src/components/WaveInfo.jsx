@@ -5,8 +5,6 @@ import { DIRECTIONS } from '../utils/regions'
 import { getWaveSeason } from '../utils/season'
 import WaveLoadBar from './WaveLoadBar'
 
-// Ближайшая волна направления: дата, дедлайн, заполненность.
-// compact — строка над каталогом; без него — карточка для главной.
 export default function WaveInfo({ direction, wave, compact = false }) {
     const label = DIRECTIONS[direction].label
 

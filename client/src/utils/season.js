@@ -1,6 +1,3 @@
-// Сезонные правила доставки. Сезон определяется по месяцу ОТПРАВКИ волны.
-// Копия этих правил есть на сервере: server/lib/season.js — меняйте синхронно.
-
 const SEASONS = {
     winter: {
         key: 'winter',
@@ -32,15 +29,13 @@ const SEASONS = {
     },
 }
 
-// month — номер месяца 1–12
 export function getSeason(month) {
-    if ([12, 1, 2].includes(month)) return SEASONS.winter // термоупаковка обязательна
-    if ([6, 7, 8].includes(month)) return SEASONS.summer // термоупаковка обязательна
-    if ([5, 11].includes(month)) return SEASONS.offseason // +7 дней к сроку
-    return SEASONS.calm // март–апрель, сентябрь–октябрь
+    if ([12, 1, 2].includes(month)) return SEASONS.winter
+    if ([6, 7, 8].includes(month)) return SEASONS.summer
+    if ([5, 11].includes(month)) return SEASONS.offseason
+    return SEASONS.calm
 }
 
-// '2026-11-07' → 11
 export function getMonthFromISO(isoDate) {
     return Number(String(isoDate).slice(5, 7))
 }

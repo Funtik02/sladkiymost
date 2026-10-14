@@ -1,5 +1,3 @@
-// Поле формы с подписью и сообщением об ошибке под ним.
-// as: 'input' | 'textarea' | 'select'; остальные пропсы уходят в сам элемент.
 export default function TextField({ id, label, error, hint, as: Element = 'input', required = false, className = '', children, ...props }) {
     const describedBy = [error && `${id}-error`, hint && `${id}-hint`].filter(Boolean).join(' ') || undefined
 

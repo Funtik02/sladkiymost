@@ -2,11 +2,10 @@ const express = require('express')
 const HttpError = require('../lib/httpError')
 const { withSyncedState } = require('../lib/waves')
 const { buildOrder, publicOrder, quoteOrder, validateContacts, withWave } = require('../lib/orders')
+const { resolveUser } = require('./account')
 
 const router = express.Router()
 
-// Предварительный расчёт: та же проверка и пересчёт, что при создании, но без сохранения.
-// Клиент вызывает его перед имитацией оплаты картой.
 router.post('/orders/quote', async (req, res) => {
     const result = await withSyncedState(async ({ waves, read }) => {
         const products = await read('products')
@@ -25,14 +24,17 @@ router.post('/orders/quote', async (req, res) => {
 })
 
 router.post('/orders', async (req, res) => {
+    const user = await resolveUser(req)
+    if (!user) throw new HttpError(401, 'Войдите в личный кабинет, чтобы оформить заказ')
+
     const order = await withSyncedState(async ({ waves, orders, read, write }) => {
         const [products, pickupPoints] = await Promise.all([read('products'), read('pickup-points')])
 
         const quote = quoteOrder(req.body, { products, waves })
         const contacts = validateContacts(req.body, quote.direction, pickupPoints)
         const created = buildOrder(quote, contacts, orders, req.body.thermoChosen)
+        created.userId = user.id
 
-        // Вес заказа добавляется к загрузке волны в той же транзакции
         quote.wave.currentWeightKg = quote.delivery.waveWeightAfterKg
         orders.push(created)
 

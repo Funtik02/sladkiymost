@@ -58,8 +58,6 @@ function snapshot(product) {
     }
 }
 
-// Превращает позиции из запроса в строки заказа с ценами и весом ИЗ БАЗЫ.
-// Цены и веса из запроса игнорируются.
 function resolveLines(rawItems, products) {
     if (!Array.isArray(rawItems) || rawItems.length === 0) {
         throw new HttpError(400, 'Корзина пуста')
@@ -130,7 +128,6 @@ function resolveLines(rawItems, products) {
     return { lines, direction: lines[0].direction }
 }
 
-// Полный пересчёт заказа на сервере: товары, волна, срок годности, вместимость, доставка
 function quoteOrder(payload, { products, waves }) {
     const { lines, direction } = resolveLines(payload?.items, products)
 
@@ -163,8 +160,6 @@ function quoteOrder(payload, { products, waves }) {
     const goods = lines.reduce((sum, l) => sum + l.lineTotal, 0)
     const total = goods + delivery.total
 
-    // Клиент показал покупателю сумму clientTotal. Если на сервере вышло дороже
-    // (поменялись цены) — не списываем молча, а просим проверить корзину.
     const clientTotal = Number(payload.clientTotal)
     if (Number.isFinite(clientTotal) && total > clientTotal) {
         throw new HttpError(409, `Стоимость заказа изменилась: ${total} ₽ вместо ${clientTotal} ₽. Проверьте корзину`)
@@ -224,6 +219,10 @@ function validateContacts(payload, direction, pickupPoints) {
         throw new HttpError(400, 'Выберите способ оплаты')
     }
 
+    if (payload.personalDataConsent !== true) {
+        throw new HttpError(400, 'Без согласия на обработку персональных данных заказ не оформить')
+    }
+
     return {
         scenario,
         customer,
@@ -235,6 +234,7 @@ function validateContacts(payload, direction, pickupPoints) {
             label: PAYMENT_METHODS[payload.paymentMethod],
             status: payload.paymentMethod === 'card' ? 'paid' : 'on_delivery',
         },
+        personalDataConsent: { given: true, at: nowISO() },
     }
 }
 
@@ -312,10 +312,9 @@ function maskEmail(email) {
     return `${user.slice(0, 1)}***@${domain}`
 }
 
-// Страница отслеживания доступна всем, кто знает номер, — контакты маскируем,
-// а для подарка со скрытой ценой убираем все суммы.
 function publicOrder(order, waves) {
-    const view = withWave(order, waves)
+    const { userId, personalDataConsent, ...rest } = order
+    const view = withWave(rest, waves)
 
     view.customer = {
         name: order.customer.name,

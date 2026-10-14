@@ -3,7 +3,6 @@ import { parseISODate, pluralize } from '../utils/format'
 
 const pad = (n) => String(n).padStart(2, '0')
 
-// Обратный отсчёт до конца дня закрытия приёма заказов
 export default function Countdown({ cutoffDate }) {
     const now = useNow(1000)
     const end = parseISODate(cutoffDate)

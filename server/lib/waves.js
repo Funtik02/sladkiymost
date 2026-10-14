@@ -2,10 +2,10 @@ const db = require('../db')
 const HttpError = require('./httpError')
 const { addDays, nowISO, todayISO } = require('./dates')
 const { MIN_WAVE_KG, MAX_WAVE_KG, roundTo } = require('./delivery')
+const { notifyOrderChanges, snapshotOrders } = require('./telegram')
 
 const WAVE_INTERVAL_DAYS = 14
 const CUTOFF_DAYS_BEFORE = 3
-// Сколько открытых волн держать в расписании на каждое направление
 const OPEN_WAVES_AHEAD = 4
 const FIRST_WAVE_OFFSET_DAYS = 7
 
@@ -38,12 +38,10 @@ const ORDER_STATUS_LABELS = {
     received: 'Получен',
 }
 
-// Товар едет волной из своего региона
 function directionFromRegion(region) {
     return Object.values(DIRECTIONS).find((d) => d.fromRegion === region)?.code ?? null
 }
 
-// Подарочный набор едет волной в регион назначения
 function directionToRegion(region) {
     return Object.values(DIRECTIONS).find((d) => d.toRegion === region)?.code ?? null
 }
@@ -89,7 +87,6 @@ function pushOrderStatus(order, status, at, note) {
     order.statusHistory.push({ status, at, ...(note ? { note } : {}) })
 }
 
-// Закрыть приём: заказы волны уходят в сборку
 function closeWave(wave, orders, note) {
     const at = nowISO()
 
@@ -102,7 +99,6 @@ function closeWave(wave, orders, note) {
         .forEach((o) => pushOrderStatus(o, 'assembling', at, 'Приём в волну закрыт, заказ собирается'))
 }
 
-// Отправить волну: все её заказы переходят в «в пути»
 function departWave(wave, orders) {
     const at = nowISO()
 
@@ -118,9 +114,6 @@ function departWave(wave, orders) {
         })
 }
 
-// Перенос волны, не набравшей минимум 50 кг, на следующую дату по расписанию (+14 дней).
-// Если на эту дату уже есть открытая волна и вес помещается — заказы переезжают в неё,
-// иначе сама волна сдвигается на новую дату.
 function postponeWave(wave, waves, orders, reason, today = todayISO()) {
     const at = nowISO()
     const fromDate = wave.departureDate
@@ -176,10 +169,6 @@ function postponeWave(wave, waves, orders, reason, today = todayISO()) {
     return { fromDate, toDate, mergedInto: target ? target.id : null }
 }
 
-// Приводит волны в актуальное состояние на сегодня:
-// 1) у открытых волн с прошедшим дедлайном закрывает приём или переносит их;
-// 2) достраивает расписание, чтобы в каждом направлении было OPEN_WAVES_AHEAD открытых волн.
-// Возвращает true, если что-то изменилось и данные нужно сохранить.
 function syncWaves(waves, orders, today = todayISO()) {
     let changed = false
 
@@ -223,18 +212,26 @@ function syncWaves(waves, orders, today = todayISO()) {
     return changed
 }
 
-// Читает волны и заказы, синхронизирует их и сохраняет, если были изменения.
-// Если передан fn — он выполняется в той же транзакции.
 function withSyncedState(fn) {
-    return db.transaction(async ({ read, write }) => {
-        const [waves, orders] = await Promise.all([read('waves'), read('orders')])
+    let state = null
 
-        if (syncWaves(waves, orders)) {
-            await Promise.all([write('waves', waves), write('orders', orders)])
-        }
+    return db
+        .transaction(async ({ read, write }) => {
+            const [waves, orders] = await Promise.all([read('waves'), read('orders')])
+            const before = snapshotOrders(orders)
 
-        return fn ? fn({ waves, orders, read, write }) : { waves, orders }
-    })
+            if (syncWaves(waves, orders)) {
+                await Promise.all([write('waves', waves), write('orders', orders)])
+            }
+
+            const result = fn ? await fn({ waves, orders, read, write }) : { waves, orders }
+            state = { before, waves, orders }
+            return result
+        })
+        .then((result) => {
+            notifyOrderChanges(state.before, state.orders, state.waves)
+            return result
+        })
 }
 
 function publicWave(wave) {

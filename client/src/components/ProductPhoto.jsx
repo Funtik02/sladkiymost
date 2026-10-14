@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { photoUrl } from '../utils/format'
 import { REGIONS } from '../utils/regions'
+import { CategoryIcon } from './Icons'
 
-// Фото товара; если файл не загрузился — аккуратная заглушка вместо «битой» картинки
 export default function ProductPhoto({ product, className = '', eager = false }) {
     const src = photoUrl(product.photo)
     const [failedSrc, setFailedSrc] = useState(null)
@@ -11,7 +11,7 @@ export default function ProductPhoto({ product, className = '', eager = false })
     if (!src || failedSrc === src) {
         return (
             <div className={`photo-fallback photo-fallback--${theme} ${className}`} role="img" aria-label={product.name}>
-                <span aria-hidden="true">🍬</span>
+                <CategoryIcon category={product.category} size={56} strokeWidth="1.4" />
             </div>
         )
     }

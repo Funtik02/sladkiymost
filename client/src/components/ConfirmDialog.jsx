@@ -15,7 +15,6 @@ export default function ConfirmDialog({
         <Modal open={open} title={title} onClose={onCancel} size="sm" closable={!busy}>
             <p className="confirm__message">{message}</p>
             <div className="confirm__actions">
-                {/* Для опасных действий фокус по умолчанию — на «Отмене», чтобы случайный Enter ничего не удалил */}
                 <button type="button" className="btn btn--ghost" onClick={onCancel} disabled={busy} data-autofocus={danger || undefined}>
                     {cancelLabel}
                 </button>

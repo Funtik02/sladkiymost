@@ -25,7 +25,6 @@ router.post('/login', async (req, res) => {
     const token = login(req.body?.password)
 
     if (!token) {
-        // Небольшая задержка усложняет перебор паролей
         await new Promise((resolve) => setTimeout(resolve, 400))
         throw new HttpError(401, 'Неверный пароль')
     }
@@ -39,8 +38,6 @@ router.post('/logout', (req, res) => {
     logout(req.adminToken)
     res.json({ ok: true })
 })
-
-// --- Товары -----------------------------------------------------------------
 
 router.get('/products', async (req, res) => {
     res.json(await db.read('products'))
@@ -92,8 +89,6 @@ router.delete('/products/:id', async (req, res) => {
 
     res.json({ id: req.params.id })
 })
-
-// --- Волны ------------------------------------------------------------------
 
 function adminWave(wave, orders) {
     const waveOrders = orders.filter((o) => o.waveId === wave.id)
@@ -180,8 +175,6 @@ router.put('/waves/:id', async (req, res) => {
 
     res.json(wave)
 })
-
-// --- Заказы -----------------------------------------------------------------
 
 router.get('/orders', async (req, res) => {
     const { waves, orders } = await withSyncedState()

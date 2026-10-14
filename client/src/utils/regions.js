@@ -1,5 +1,3 @@
-// Регионы, витрины и направления волн
-
 export const REGIONS = {
     Якутия: {
         name: 'Якутия',
@@ -47,12 +45,10 @@ export const DIRECTIONS = {
 
 export const DIRECTION_CODES = Object.keys(DIRECTIONS)
 
-// Товар едет волной из своего региона
 export function directionFromRegion(region) {
     return REGIONS[region]?.direction ?? null
 }
 
-// Подарочный набор едет волной в регион назначения
 export function directionToRegion(region) {
     return Object.values(DIRECTIONS).find((d) => d.toRegion === region)?.code ?? null
 }

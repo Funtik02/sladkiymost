@@ -1,10 +1,7 @@
-// Проверка форм на клиенте. Сервер проверяет то же самое ещё раз.
-
 import { CARD_TEXT_MAX } from './gift.js'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
-// Убираем пробелы, скобки и дефисы; 8XXXXXXXXXX и 9XXXXXXXXX приводим к +7…
 export function normalizePhone(value) {
     const compact = String(value ?? '').replace(/[\s()-]/g, '')
 
@@ -18,7 +15,6 @@ export function isValidPhone(value) {
     return /^\+7\d{10}$/.test(normalizePhone(value))
 }
 
-// +79141234567 → +7 914 123-45-67 (для удобного чтения в поле)
 export function formatPhone(value) {
     const phone = normalizePhone(value)
     if (!/^\+7\d{10}$/.test(phone)) return value
@@ -47,7 +43,6 @@ function validateEmail(value) {
     return isValidEmail(value) ? '' : 'Проверьте email: пример — name@mail.ru'
 }
 
-// Возвращает объект ошибок вида { 'customer.name': 'Укажите имя' }; пустой — форма в порядке
 export function validateCheckout(form) {
     const errors = {
         'customer.name': validateName(form.customer.name),

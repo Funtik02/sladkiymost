@@ -1,6 +1,5 @@
 import { request, toQuery } from './client'
 
-// params: region, category, manufacturer, minPrice, maxPrice, search, sort, noTempSensitive, limit
 export function getProducts(params = {}, signal) {
     return request(`/products${toQuery(params)}`, { signal })
 }

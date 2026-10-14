@@ -1,7 +1,6 @@
 import { Navigate, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAdmin } from '../context/AdminContext'
 
-// Защищённая часть админки: без токена — на страницу входа /admin
 export default function RequireAdmin() {
     const { isAuthenticated, logout } = useAdmin()
     const navigate = useNavigate()

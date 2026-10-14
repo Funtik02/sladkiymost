@@ -2,13 +2,10 @@ import { formatDateTime } from '../utils/format'
 import { ORDER_STATUS_LABELS, ORDER_STATUSES } from '../utils/regions'
 import { CheckIcon } from './Icons'
 
-// «принят» → «в сборке» → «в пути» → «на пункте выдачи» → «получен»
 export default function StatusTimeline({ status, history }) {
     const currentIndex = ORDER_STATUSES.indexOf(status)
-    // «Получен» — последний шаг: заказ завершён, подсвечиваем его как пройденный
     const finished = currentIndex === ORDER_STATUSES.length - 1
 
-    // Дата, когда заказ перешёл в статус (последняя запись истории)
     const reachedAt = (step) => [...history].reverse().find((h) => h.status === step)?.at
 
     return (

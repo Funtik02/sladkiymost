@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { readJSON, writeJSON } from '../utils/storage'
 
-// Избранное — список id товаров в localStorage
 const STORAGE_KEY = 'sweet-bridge:favorites'
 
 const FavoritesContext = createContext(null)
@@ -22,7 +21,6 @@ export function FavoritesProvider({ children }) {
         setIds((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]))
     }, [])
 
-    // Убрать товары, которых больше нет в каталоге
     const keepOnly = useCallback((existingIds) => {
         setIds((list) => {
             const next = list.filter((id) => existingIds.includes(id))

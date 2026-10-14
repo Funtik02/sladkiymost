@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { useToast } from '../context/ToastContext'
 import { CloseIcon } from './Icons'
 
-// Контейнер уведомлений; aria-live, чтобы экранные дикторы озвучивали сообщения
 export default function Toast() {
     const { toasts, dismissToast } = useToast()
 

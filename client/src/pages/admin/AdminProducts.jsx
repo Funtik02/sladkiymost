@@ -20,7 +20,7 @@ export default function AdminProducts() {
     const { call } = useAdmin()
     const { showToast } = useToast()
     const { data, error, loading, reload, setData } = useFetch((signal) => call(getAdminProducts, signal), [])
-    const [editing, setEditing] = useState(null) // null | 'new' | product
+    const [editing, setEditing] = useState(null)
     const [deleting, setDeleting] = useState(null)
     const [busy, setBusy] = useState(false)
     const [query, setQuery] = useState('')
@@ -85,7 +85,7 @@ export default function AdminProducts() {
                             <th scope="col">Категория</th>
                             <th scope="col">Вес</th>
                             <th scope="col">Цена</th>
-                            <th scope="col">🌡</th>
+                            <th scope="col">Термо</th>
                             <th scope="col">Срок, дн.</th>
                             <th scope="col">Действия</th>
                         </tr>

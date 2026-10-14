@@ -14,10 +14,10 @@ import { useFetch } from '../../hooks/useFetch'
 import { formatDate, formatDateTime, formatKg, formatRub } from '../../utils/format'
 import { DIRECTIONS, ORDER_STATUS_LABELS, ORDER_STATUSES } from '../../utils/regions'
 import { formatPhone } from '../../utils/validation'
+import { GiftIcon } from '../../components/Icons'
 
 const nextStatus = (status) => ORDER_STATUSES[ORDER_STATUSES.indexOf(status) + 1] ?? null
 
-// Аналитика по всем заказам: количество, средний чек, топ-5 товаров по проданным штукам
 function useAnalytics(orders) {
     return useMemo(() => {
         const sold = new Map()
@@ -160,7 +160,6 @@ export default function AdminOrders() {
     if (loading && !data) return <Loader label="Загружаем заказы…" />
     if (error && !data) return <ErrorMessage error={error} onRetry={reload} />
 
-    // Волны для фильтра — только те, где есть заказы
     const waveOptions = [...new Map(orders.filter((o) => o.wave).map((o) => [o.wave.id, o.wave])).values()].sort(
         (a, b) => a.direction.localeCompare(b.direction) || a.departureDate.localeCompare(b.departureDate)
     )
@@ -265,7 +264,11 @@ export default function AdminOrders() {
                                 <tr key={order.id}>
                                     <td className="nowrap">
                                         {order.id}
-                                        {order.scenario === 'gift' && <span title="Подарок"> 🎁</span>}
+                                        {order.scenario === 'gift' && (
+                                            <span className="inline-icon" title="Подарок">
+                                                <GiftIcon size={15} />
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="nowrap">{formatDateTime(order.createdAt)}</td>
                                     <td>{order.customer.name}</td>

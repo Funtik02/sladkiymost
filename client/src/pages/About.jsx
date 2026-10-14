@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 const RULES = [
@@ -7,7 +8,7 @@ const RULES = [
     ['Срок в пути', '10–14 дней; в мае и ноябре (межсезонье) — на 7 дней дольше.'],
     ['Партия', 'Минимум 50 кг, максимум 300 кг. Заказ, который не помещается, в волну не принимается.'],
     ['Тариф', '500 ₽ за 1 кг. Если волна с вашим заказом заполнена больше чем на 50 % (150 кг) — скидка 20 %, больше чем на 80 % (240 кг) — 35 %.'],
-    ['Термоупаковка', '150 ₽ за заказ. Декабрь–февраль и июнь–август — обязательна для термочувствительных товаров 🌡 (защита от мороза и перегрева), в остальное время — по желанию.'],
+    ['Термоупаковка', '150 ₽ за заказ. Декабрь–февраль и июнь–август — обязательна для термочувствительных товаров (защита от мороза и перегрева), в остальное время — по желанию.'],
 ]
 
 const ASSUMPTIONS = [
@@ -20,6 +21,7 @@ const ASSUMPTIONS = [
 
 export default function About() {
     useDocumentTitle('О проекте')
+    const { isLoggedIn } = useAuth()
 
     return (
         <div className="container section narrow">
@@ -59,10 +61,10 @@ export default function About() {
                 <h2 className="section-subtitle">Контакты</h2>
                 <ul className="bullets">
                     <li>
-                        Почта: <a href="mailto:hello@sweet-bridge.example">hello@sweet-bridge.example</a>
+                        Почта: <a href="mailto:ndanilov40@gmail.com">ndanilov40@gmail.com</a>
                     </li>
                     <li>
-                        Телефон: <a href="tel:+78001234567">8 800 123-45-67</a> (ежедневно 9:00–21:00 мск)
+                        Телефон: <a href="tel:+79627354777">+7 962 735-47-77</a> (ежедневно 12:00–21:00 мск)
                     </li>
                     <li>
                         Пункты выдачи: 3 в Якутске и 3 в Донецке — список при оформлении заказа.
@@ -72,9 +74,11 @@ export default function About() {
                     <Link to="/waves" className="btn btn--primary">
                         Посмотреть загрузку волн
                     </Link>
-                    <Link to="/track" className="btn btn--ghost">
-                        Отследить заказ
-                    </Link>
+                    {isLoggedIn && (
+                        <Link to="/track" className="btn btn--ghost">
+                            Отследить заказ
+                        </Link>
+                    )}
                 </div>
             </section>
         </div>

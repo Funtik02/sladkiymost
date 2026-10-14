@@ -1,4 +1,5 @@
 import { REGIONS } from '../utils/regions'
+import { SnowflakeIcon, SunIcon } from './Icons'
 
 export default function RegionBadge({ region, small = false }) {
     const info = REGIONS[region]
@@ -6,7 +7,8 @@ export default function RegionBadge({ region, small = false }) {
 
     return (
         <span className={`region-badge region-badge--${info.theme} ${small ? 'region-badge--small' : ''}`}>
-            <span aria-hidden="true">{info.theme === 'yakutia' ? '❄' : '☀'}</span> {region}
+            {info.theme === 'yakutia' ? <SnowflakeIcon size={13} /> : <SunIcon size={13} />}
+            {region}
         </span>
     )
 }

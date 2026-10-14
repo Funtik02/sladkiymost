@@ -1,6 +1,3 @@
-// Проверки: 1) клиентский и серверный расчёт доставки совпадают;
-// 2) syncWaves закрывает/переносит волны после дедлайна и достраивает расписание.
-// Запуск: npm test (из корня проекта)
 import { createRequire } from 'module'
 import path from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
@@ -14,7 +11,6 @@ const client = await import(pathToFileURL(path.join(ROOT, 'client', 'src', 'util
 let failures = 0
 const check = (cond, msg) => { if (!cond) { failures++; console.log('FAIL', msg) } }
 
-// 1. Совпадение расчётов на случайных данных
 const months = ['01', '03', '05', '07', '10', '11', '12']
 for (let i = 0; i < 5000; i++) {
     const items = Array.from({ length: 1 + (i % 4) }, (_, k) => ({
@@ -29,7 +25,6 @@ for (let i = 0; i < 5000; i++) {
     check(JSON.stringify(a) === JSON.stringify(b), `calcDelivery mismatch #${i}`)
 }
 
-// Граничные случаи формулы из ТЗ
 const at = (current, weightKg) =>
     server.calcDelivery({ items: [{ weight_g: weightKg * 1000, qty: 1, temp_sensitive: false }], wave: { departureDate: '2026-10-24', currentWeightKg: current, maxWeightKg: 300 } })
 check(at(149, 1).discount === 0, '150 кг ровно — скидки ещё нет (строго больше 50 %)')
@@ -46,12 +41,11 @@ const tier = client.getNextDiscountTier(140)
 check(tier.discount === 0.2 && tier.neededKg === 10.1, `подсказка: при 140 кг нужно 10,1 кг (получено ${tier.neededKg})`)
 check(client.getDiscount((140 + tier.neededKg) / 300) === 0.2, 'после добавления подсказанного веса скидка действительно есть')
 
-// 2. syncWaves: дедлайн прошёл
 const mk = (id, date, cutoff, kg) => ({ id, direction: 'YKT_DNR', departureDate: date, cutoffDate: cutoff, currentWeightKg: kg, maxWeightKg: 300, minWeightKg: 50, status: 'open', postponedFrom: [], mergedInto: null, history: [] })
 const waves = [
-    mk('A', '2026-10-17', '2026-10-14', 120), // набрала минимум → закрыть
-    mk('B', '2026-10-31', '2026-10-28', 30), // не набрала → перенос на 14.11 (свободная дата) — сдвиг
-    { ...mk('C', '2026-10-24', '2026-10-21', 10), direction: 'DNR_YKT' }, // не набрала → слияние с D
+    mk('A', '2026-10-17', '2026-10-14', 120),
+    mk('B', '2026-10-31', '2026-10-28', 30),
+    { ...mk('C', '2026-10-24', '2026-10-21', 10), direction: 'DNR_YKT' },
     { ...mk('D', '2026-11-07', '2026-11-04', 100), direction: 'DNR_YKT' },
 ]
 const orders = [

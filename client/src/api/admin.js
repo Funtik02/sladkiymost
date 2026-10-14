@@ -8,7 +8,6 @@ export function logout(token) {
     return request('/admin/logout', { method: 'POST', token })
 }
 
-// --- Товары
 export function getAdminProducts(token, signal) {
     return request('/admin/products', { token, signal })
 }
@@ -25,7 +24,6 @@ export function deleteProduct(token, id) {
     return request(`/admin/products/${encodeURIComponent(id)}`, { method: 'DELETE', token })
 }
 
-// --- Волны
 export function getAdminWaves(token, signal) {
     return request('/admin/waves', { token, signal })
 }
@@ -34,12 +32,10 @@ export function createWave(token, wave) {
     return request('/admin/waves', { method: 'POST', token, body: wave })
 }
 
-// action: 'close' | 'depart' | 'postpone'
 export function updateWave(token, id, action) {
     return request(`/admin/waves/${encodeURIComponent(id)}`, { method: 'PUT', token, body: { action } })
 }
 
-// --- Заказы
 export function getAdminOrders(token, signal) {
     return request('/admin/orders', { token, signal })
 }

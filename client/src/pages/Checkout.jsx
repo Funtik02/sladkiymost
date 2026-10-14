@@ -3,12 +3,14 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { createOrder, quoteOrder } from '../api/orders'
 import { getPickupPoints, getWaves } from '../api/waves'
 import DeliveryBreakdown from '../components/DeliveryBreakdown'
+import ConsentCheckbox from '../components/ConsentCheckbox'
 import ErrorMessage from '../components/ErrorMessage'
 import GiftFields from '../components/GiftFields'
 import Loader from '../components/Loader'
 import PaymentModal from '../components/PaymentModal'
 import PickupSelect from '../components/PickupSelect'
 import TextField from '../components/TextField'
+import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useFetch } from '../hooks/useFetch'
@@ -30,7 +32,6 @@ const EMPTY_FORM = {
     paymentMethod: 'card',
 }
 
-// Черновик формы переживает уход в корзину и обратно (в пределах вкладки)
 function loadDraft() {
     const draft = readJSON(sessionStorage, DRAFT_KEY, null)
     if (!draft || typeof draft !== 'object') return EMPTY_FORM
@@ -50,20 +51,25 @@ function loadDraft() {
     }
 }
 
-// 'customer.name' → id поля в разметке (для фокуса на первой ошибке)
 function fieldId(scenario, key) {
     if (key === 'pickupPointId') return `${scenario}-pickup`
     if (key === 'paymentMethod') return 'payment-card'
+    if (key === 'consent') return 'personal-data-consent'
     return `${scenario}-${key.replace('.', '-')}`
 }
 
 export default function Checkout() {
     useDocumentTitle('Оформление заказа')
-    const { items, waveId } = useCart()
-    // После успешного заказа корзина очищается — это не повод уводить в /cart
+    const { items, waveId, syncing } = useCart()
+    const { isLoggedIn, checking } = useAuth()
     const [placed, setPlaced] = useState(false)
 
-    // Без товаров или без выбранной волны оформлять нечего
+    if (checking || syncing) return <Loader label="Загружаем корзину…" />
+
+    if (!isLoggedIn && !placed) {
+        return <Navigate to="/account?reason=checkout&next=/checkout" replace />
+    }
+
     if (!placed && (items.length === 0 || !waveId)) {
         return <Navigate to="/cart" replace />
     }
@@ -73,7 +79,7 @@ export default function Checkout() {
 
 function CheckoutView({ placed, onPlaced }) {
     const cart = useCart()
-    const { items, direction, waveId, thermoChosen, goodsTotal, clear } = cart
+    const { items, direction, waveId, thermoChosen, consent, setConsent, goodsTotal, clear } = cart
     const navigate = useNavigate()
     const info = DIRECTIONS[direction]
 
@@ -82,7 +88,7 @@ function CheckoutView({ placed, onPlaced }) {
     const [submitAttempted, setSubmitAttempted] = useState(false)
     const [submitting, setSubmitting] = useState(false)
     const [serverError, setServerError] = useState(null)
-    const [payment, setPayment] = useState(null) // { amount, payload } — открыт модал оплаты
+    const [payment, setPayment] = useState(null)
 
     const data = useFetch(
         (signal) => Promise.all([getWaves(direction, signal), getPickupPoints(direction, signal)]),
@@ -92,6 +98,21 @@ function CheckoutView({ placed, onPlaced }) {
     useEffect(() => {
         writeJSON(sessionStorage, DRAFT_KEY, form)
     }, [form])
+
+    const { user, token } = useAuth()
+    const [prefilledFor, setPrefilledFor] = useState(null)
+
+    if (user && prefilledFor !== user.id) {
+        setPrefilledFor(user.id)
+        setForm((prev) => ({
+            ...prev,
+            customer: {
+                name: prev.customer.name || user.name,
+                phone: prev.customer.phone || (user.phone ? formatPhone(user.phone) : ''),
+                email: prev.customer.email || user.email,
+            },
+        }))
+    }
 
     if (placed) return <Loader label="Открываем ваш заказ…" />
 
@@ -135,7 +156,10 @@ function CheckoutView({ placed, onPlaced }) {
     const arrival = getExpectedArrival(wave)
     const city = info.toCity
 
-    const allErrors = validateCheckout(form)
+    const allErrors = {
+        ...validateCheckout(form),
+        ...(consent ? {} : { consent: 'Без согласия на обработку персональных данных заказ не оформить' }),
+    }
     const errors = Object.fromEntries(Object.entries(allErrors).filter(([key]) => submitAttempted || touched[key]))
 
     const setField = (path, value) => {
@@ -171,12 +195,12 @@ function CheckoutView({ placed, onPlaced }) {
         pickupPointId: form.pickupPointId,
         gift: form.scenario === 'gift' ? { ...form.gift, cardText: form.gift.cardText.trim() } : undefined,
         paymentMethod: form.paymentMethod,
-        // Сумма, которую видел покупатель: если на сервере выйдет дороже — заказ не создастся
+        personalDataConsent: consent,
         clientTotal: total,
     })
 
     const placeOrder = async (payload) => {
-        const order = await createOrder(payload)
+        const order = await createOrder(payload, token)
         onPlaced()
         removeKey(sessionStorage, DRAFT_KEY)
         navigate(`/order/${order.orderId}/success`, { state: { order } })
@@ -199,7 +223,6 @@ function CheckoutView({ placed, onPlaced }) {
 
         try {
             if (form.paymentMethod === 'card') {
-                // Сервер проверяет и пересчитывает заказ до «оплаты»
                 const quote = await quoteOrder(payload)
                 setPayment({ amount: quote.total, payload })
                 return
@@ -241,6 +264,9 @@ function CheckoutView({ placed, onPlaced }) {
 
             <form className="checkout" onSubmit={handleSubmit} noValidate>
                 <div className="checkout__main">
+                    <p className="account-note">
+                        Заказ сохранится в вашем <Link to="/account" className="link">личном кабинете</Link>.
+                    </p>
                     <div className="segmented" role="radiogroup" aria-label="Кому заказ">
                         {[
                             { value: 'self', label: 'Заказ себе' },
@@ -343,6 +369,15 @@ function CheckoutView({ placed, onPlaced }) {
                             </label>
                         </div>
                     </fieldset>
+
+                    <ConsentCheckbox
+                        checked={consent}
+                        onChange={(value) => {
+                            setConsent(value)
+                            touch('consent')
+                        }}
+                        error={errors.consent}
+                    />
 
                     {serverError && (
                         <div className="notice notice--danger" role="alert">

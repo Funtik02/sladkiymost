@@ -1,10 +1,9 @@
 import { CARD_DESIGNS, CARD_TEXT_MAX } from '../utils/gift'
 import GiftCardPreview from './GiftCardPreview'
+import DesignIcon from './DesignIcon'
 import PickupSelect from './PickupSelect'
 import TextField from './TextField'
 
-// Поля сценария «Подарок в другой регион»: отправитель, получатель, открытка.
-// Справа — живой предпросмотр открытки.
 export default function GiftFields({ form, errors, onChange, onBlur, pickupPoints, city }) {
     const field = (path, props) => ({
         id: `gift-${path.replace('.', '-')}`,
@@ -96,7 +95,7 @@ export default function GiftFields({ form, errors, onChange, onBlur, pickupPoint
                                     onChange={() => onChange('gift.cardDesign', design.id)}
                                 />
                                 <span className="design-option__swatch" aria-hidden="true">
-                                    {design.emoji}
+                                    <DesignIcon icon={design.icon} size={22} />
                                 </span>
                                 <span>{design.label}</span>
                             </label>

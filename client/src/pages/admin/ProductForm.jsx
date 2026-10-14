@@ -19,7 +19,6 @@ const EMPTY = {
 
 const PHOTO_RE = /^(https?:\/\/\S+|[\w.-]+\.(jpe?g|png|webp|svg|gif))$/i
 
-// Те же правила, что на сервере (server/lib/products.js)
 function validate(values) {
     const errors = {}
     const text = (field, label, min, max) => {
@@ -150,7 +149,7 @@ export default function ProductForm({ product, categories, manufacturers, onSave
 
             <label className="checkbox">
                 <input type="checkbox" checked={values.temp_sensitive} onChange={set('temp_sensitive')} />
-                <span>🌡 Чувствителен к температуре (зимой и летом — обязательная термоупаковка)</span>
+                <span>Чувствителен к температуре (зимой и летом — обязательная термоупаковка)</span>
             </label>
 
             {values.photo.trim() && PHOTO_RE.test(values.photo.trim()) && (

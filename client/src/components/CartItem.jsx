@@ -7,8 +7,8 @@ import ProductPhoto from './ProductPhoto'
 import QuantityInput from './QuantityInput'
 import RegionBadge from './RegionBadge'
 import ThermoBadge from './ThermoBadge'
+import { GiftIcon } from './Icons'
 
-// expiring — позиция не доедет выбранной волной из-за срока годности
 export default function CartItem({ item, expiring = false }) {
     const { setQty, increment, decrement, remove } = useCart()
     const isBox = item.type === 'giftBox'
@@ -18,7 +18,7 @@ export default function CartItem({ item, expiring = false }) {
             <div className="cart-item__media">
                 {isBox ? (
                     <div className="cart-item__box" aria-hidden="true">
-                        🎁
+                        <GiftIcon size={30} strokeWidth="1.6" />
                     </div>
                 ) : (
                     <Link to={`/product/${item.productId}`} tabIndex={-1} aria-hidden="true">

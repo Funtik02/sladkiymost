@@ -12,7 +12,6 @@ export function ToastProvider({ children }) {
         setToasts((list) => list.filter((t) => t.id !== id))
     }, [])
 
-    // type: 'success' | 'error' | 'info'; action: { label, to } — ссылка внутри уведомления
     const showToast = useCallback(
         (message, { type = 'success', action } = {}) => {
             const id = nextId.current++

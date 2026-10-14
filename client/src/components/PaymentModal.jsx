@@ -5,12 +5,8 @@ import Modal from './Modal'
 
 const PAYMENT_DELAY_MS = 1500
 
-// ИМИТАЦИЯ онлайн-оплаты — единственная разрешённая заглушка проекта.
-// Данные карты не запрашиваются и никуда не отправляются: через 1,5 с
-// «банк» всегда отвечает успехом, и вызывается onPaid.
-// Окно монтируется заново при каждом открытии, поэтому стадия всегда начинается с 'form'.
 export default function PaymentModal({ amount, onPaid, onCancel }) {
-    const [stage, setStage] = useState('form') // form → processing → success
+    const [stage, setStage] = useState('form')
     const timers = useRef([])
 
     useEffect(() => () => timers.current.forEach(clearTimeout), [])

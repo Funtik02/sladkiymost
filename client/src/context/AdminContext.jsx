@@ -2,7 +2,6 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import * as adminApi from '../api/admin'
 import { readJSON, removeKey, writeJSON } from '../utils/storage'
 
-// Токен администратора живёт в sessionStorage: закрыли вкладку — нужно войти снова
 const STORAGE_KEY = 'sweet-bridge:admin-token'
 
 const AdminContext = createContext(null)
@@ -30,13 +29,10 @@ export function AdminProvider({ children }) {
         const current = token
         forget()
         if (current) {
-            // Сервер забудет токен; если он недоступен — ничего страшного
             await adminApi.logout(current).catch(() => {})
         }
     }, [token, forget])
 
-    // Обёртка для запросов админки: при 401 сбрасываем токен,
-    // и защищённый маршрут сам отправит на страницу входа
     const call = useCallback(
         async (fn, ...args) => {
             try {

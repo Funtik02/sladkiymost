@@ -18,8 +18,8 @@ import { makeProductItem } from '../utils/cart'
 import { checkShelfLife } from '../utils/delivery'
 import { formatRub, formatWeight, pluralize, pricePer100g } from '../utils/format'
 import { DIRECTIONS, REGIONS } from '../utils/regions'
+import { ThermometerIcon } from '../components/Icons'
 
-// «Описание… Состав: …» → две части
 function splitDescription(text) {
     const index = text.indexOf('Состав:')
     if (index === -1) return { about: text, composition: '' }
@@ -51,7 +51,7 @@ export default function Product() {
                             <Link to="/catalog/yakutia" className="btn btn--primary">
                                 Сладости Якутии
                             </Link>
-                            <Link to="/catalog/donbass" className="btn btn--brown">
+                            <Link to="/catalog/donbass" className="btn btn--primary">
                                 Сладости Донбасса
                             </Link>
                         </div>
@@ -105,7 +105,8 @@ function ProductView({ product }) {
                         <span className="tag tag--muted">{product.category}</span>
                         {product.temp_sensitive && (
                             <span className="tag tag--blue">
-                                <span aria-hidden="true">🌡 </span>чувствителен к температуре
+                                <ThermometerIcon size={13} />
+                                чувствителен к температуре
                             </span>
                         )}
                     </div>

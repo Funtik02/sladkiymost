@@ -28,7 +28,7 @@ function WaveCard({ wave }) {
             <header className="wave-card__head">
                 <h3 className="wave-card__date">{formatDate(wave.departureDate, { withWeekday: true })}</h3>
                 {season.key !== 'calm' && (
-                    <span className={`tag ${season.key === 'offseason' ? 'tag--brown' : 'tag--blue'}`}>
+                    <span className={`tag ${season.key === 'offseason' ? 'tag--gold' : 'tag--blue'}`}>
                         {season.label}
                         {season.thermoRequired ? ': термоупаковка' : ': +7 дней'}
                     </span>
@@ -82,7 +82,6 @@ export default function LoadDashboard() {
     useDocumentTitle('Загрузка волн')
     const { data, error, loading, reload } = useFetch((signal) => getWavesLoad(signal), [])
 
-    // Данные «живые»: раз в минуту подтягиваем свежую загрузку
     useEffect(() => {
         const timer = setInterval(reload, AUTO_REFRESH_MS)
         return () => clearInterval(timer)

@@ -1,9 +1,3 @@
-// Заполняет data/waves.json и data/orders.json демо-данными относительно СЕГОДНЯШНЕЙ даты:
-// прошедшие и открытые волны в обоих направлениях, заказы во всех статусах,
-// перенесённая волна, подарок с открыткой и набор «Север + Юг».
-// Товары и пункты выдачи не трогает. Запуск: npm run seed (из папки server).
-// Генератор детерминированный — номера демо-заказов одинаковые при каждом запуске.
-
 const db = require('../db')
 const { addDays, todayISO } = require('../lib/dates')
 const { calcDelivery, isShelfLifeOk, roundTo } = require('../lib/delivery')
@@ -27,11 +21,11 @@ const pick = (list) => list[Math.floor(rand() * list.length)]
 const shuffle = (list) => [...list].sort(() => rand() - 0.5)
 const pad = (n) => String(n).padStart(2, '0')
 
-// Локальное время → ISO-строка
 const at = (isoDate, hours, minutes = 0) => new Date(`${isoDate}T${pad(hours)}:${pad(minutes)}:00`).toISOString()
 
 const T = todayISO()
 const day = (offset) => addDays(T, offset)
+const LAUNCH = at(day(-1), 9)
 
 const BUYERS = {
     Донецк: {
@@ -63,15 +57,11 @@ function person(name) {
     return { name, phone: phone(), email: `${translit(name) || 'client'}${randInt(1, 99)}@example.com` }
 }
 
-// План волн: смещение даты отправки от сегодня, статус и целевая загрузка в кг
 const PLAN = [
-    { key: 'ykt-merged', direction: 'YKT_DNR', offset: -18, status: 'merged', kg: 31, mergeInto: 'ykt-departed' },
-    { key: 'ykt-departed', direction: 'YKT_DNR', offset: -4, status: 'departed', kg: 150 },
     { key: 'ykt-1', direction: 'YKT_DNR', offset: 10, status: 'open', kg: 168 },
     { key: 'ykt-2', direction: 'YKT_DNR', offset: 24, status: 'open', kg: 46 },
     { key: 'ykt-3', direction: 'YKT_DNR', offset: 38, status: 'open', kg: 12 },
     { key: 'ykt-4', direction: 'YKT_DNR', offset: 52, status: 'open', kg: 0 },
-    { key: 'dnr-departed', direction: 'DNR_YKT', offset: -11, status: 'departed', kg: 205 },
     { key: 'dnr-closed', direction: 'DNR_YKT', offset: 3, status: 'closed', kg: 96 },
     { key: 'dnr-1', direction: 'DNR_YKT', offset: 17, status: 'open', kg: 228 },
     { key: 'dnr-2', direction: 'DNR_YKT', offset: 31, status: 'open', kg: 64 },
@@ -81,7 +71,7 @@ const PLAN = [
 
 function makeWave(plan) {
     const departureDate = day(plan.offset)
-    const createdAt = at(addDays(departureDate, -60), 9)
+    const createdAt = LAUNCH
 
     return {
         id: `${plan.direction}-${departureDate}`,
@@ -118,18 +108,21 @@ function toLine(product, qty) {
 
 const linesWeightKg = (lines) => lines.reduce((sum, l) => sum + l.weight_g * l.qty, 0) / 1000
 
-// Окно, в котором покупатели делали заказы в эту волну
-function orderWindow(wave) {
-    const from = addDays(wave.departureDate, -40)
+const CLOSED_AT = at(T, 12, 40)
 
-    if (wave.cutoffDate < T) return { from, to: wave.cutoffDate }
-    return { from: from < day(-25) ? day(-25) : from, to: day(-1) }
+function orderWindow(wave) {
+    return { from: at(day(-1), 9, 30), to: wave.cutoffDate <= T ? CLOSED_AT : at(day(1), 22) }
 }
 
 function randomMoment({ from, to }) {
-    const start = new Date(`${from}T08:00:00`).getTime()
-    const end = new Date(`${to}T22:00:00`).getTime()
-    return new Date(start + rand() * Math.max(0, end - start)).toISOString()
+    const start = new Date(from).getTime()
+    const end = new Date(to).getTime()
+
+    for (;;) {
+        const moment = new Date(start + rand() * (end - start))
+        const hour = moment.getHours()
+        if (hour >= 8 && hour < 23 && (hour >= 10 || rand() < 0.4)) return moment.toISOString()
+    }
 }
 
 function generateDrafts(wave, targetKg, products, pickupPoints) {
@@ -142,12 +135,11 @@ function generateDrafts(wave, targetKg, products, pickupPoints) {
 
     while (total < targetKg - 1.5) {
         const remaining = targetKg - total
-        const wholesale = remaining > 8 && rand() < 0.75
+        const wholesale = remaining > 8 && rand() < 0.8
         let lines = shuffle(pool)
             .slice(0, randInt(1, wholesale ? 3 : 4))
-            .map((p) => toLine(p, wholesale ? randInt(6, 24) : randInt(1, 3)))
+            .map((p) => toLine(p, wholesale ? randInt(12, 34) : randInt(1, 3)))
 
-        // Подрезаем заказ, чтобы не перескочить целевую загрузку волны
         const weight = linesWeightKg(lines)
         if (weight > remaining + 1) {
             const factor = remaining / weight
@@ -178,7 +170,7 @@ function contactsFor(draft) {
         recipient: draft.recipient ?? null,
         gift,
         pickupPoint: draft.pickupPoint,
-        payment: rand() < 0.6
+        payment: rand() < 0.75
             ? { method: 'card', label: 'Картой онлайн (имитация)', status: 'paid' }
             : { method: 'cash', label: 'При получении', status: 'on_delivery' },
     }
@@ -236,22 +228,21 @@ async function main() {
     const point = (id) => pickupPoints.find((p) => p.id === id)
     const product = (id) => products.find((p) => p.id === id)
 
-    // Витринные заказы с фиксированными номерами — для демонстрации
     const showcase = {
-        'ykt-merged': [{
+        'ykt-1': [{
             id: '204817',
             lines: [toLine(product('YKT-001'), 2), toLine(product('YKT-006'), 3), toLine(product('YKT-014'), 4)],
-            createdAt: at(day(-27), 14, 20),
+            createdAt: at(day(-1), 14, 20),
             customer: person('Сардана Иванова'),
             recipient: { name: 'Ольга Ковальчук', phone: phone() },
             gift: { cardText: CARD_TEXTS[0], cardDesign: 'north', hidePrice: false },
             pickupPoint: point('DON-1'),
             thermoChosen: true,
         }],
-        'dnr-departed': [{
+        'dnr-closed': [{
             id: '305522',
             lines: [toLine(product('DNR-001'), 2), toLine(product('DNR-009'), 3)],
-            createdAt: at(day(-20), 11, 5),
+            createdAt: at(day(-1), 11, 5),
             customer: person('Айаал Николаев'),
             pickupPoint: point('YKS-1'),
             thermoChosen: false,
@@ -259,7 +250,7 @@ async function main() {
         'dnr-1': [{
             id: '411093',
             lines: [giftBoxLine(products, ['YKT-003', 'YKT-008', 'DNR-003', 'DNR-011'], 'Якутия')],
-            createdAt: at(day(-2), 19, 40),
+            createdAt: at(day(-1), 19, 40),
             customer: person('Наталья Ткаченко'),
             recipient: { name: 'Туйаара Попова', phone: phone() },
             gift: { cardText: CARD_TEXTS[1], cardDesign: 'bridge', hidePrice: true },
@@ -290,52 +281,11 @@ async function main() {
         }
     }
 
-    // Перенос: волна не набрала 50 кг и её заказы ушли в следующую волну
-    const merged = byKey.get('ykt-merged').wave
-    const departedYkt = byKey.get('ykt-departed').wave
-    const mergedAt = at(addDays(merged.cutoffDate, 1), 0, 5)
-    const reason = `к закрытию приёма набрано меньше ${merged.minWeightKg} кг`
-
-    orders.filter((o) => o.waveId === merged.id).forEach((o) => {
-        o.waveId = departedYkt.id
-        o.postponements.push({ from: merged.departureDate, to: departedYkt.departureDate, at: mergedAt, reason })
-    })
-    departedYkt.currentWeightKg = roundTo(departedYkt.currentWeightKg + merged.currentWeightKg, 3)
-    departedYkt.history.push({ at: mergedAt, note: `Присоединены заказы перенесённой волны от ${merged.departureDate} (${roundTo(merged.currentWeightKg, 3)} кг)` })
-    merged.history.push({ at: mergedAt, note: `Перенесена: ${reason}. Заказы переданы в волну от ${departedYkt.departureDate}` })
-    merged.status = 'merged'
-    merged.mergedInto = departedYkt.id
-    merged.currentWeightKg = 0
-
-    // Статусы прошедших волн
     for (const { plan, wave } of byKey.values()) {
         const waveOrders = orders.filter((o) => o.waveId === wave.id)
 
-        if (plan.status === 'departed') {
-            const closedAt = at(addDays(wave.cutoffDate, 1), 0, 5)
-            const departedAt = at(wave.departureDate, 8)
-            wave.status = 'departed'
-            wave.closedAt = closedAt
-            wave.departedAt = departedAt
-            wave.history.push({ at: closedAt, note: 'Приём закрыт автоматически: наступил дедлайн' })
-            wave.history.push({ at: departedAt, note: 'Волна отправлена' })
-
-            waveOrders.forEach((o, index) => {
-                const events = [
-                    { status: 'assembling', at: closedAt, note: 'Приём в волну закрыт, заказ собирается' },
-                    { status: 'in_transit', at: departedAt, note: 'Волна отправлена' },
-                ]
-                const arrived = addDays(wave.departureDate, 10)
-                if (arrived < T && index % 10 < 7) {
-                    events.push({ status: 'at_pickup', at: at(arrived, 9), note: 'Изменено администратором' })
-                    if (index % 10 < 3) events.push({ status: 'received', at: at(arrived, 18), note: 'Изменено администратором' })
-                }
-                setHistory(o, events)
-            })
-        }
-
         if (plan.status === 'closed') {
-            const closedAt = at(day(-1), 17)
+            const closedAt = CLOSED_AT
             wave.status = 'closed'
             wave.closedAt = closedAt
             wave.history.push({ at: closedAt, note: 'Приём закрыт администратором' })
@@ -345,15 +295,6 @@ async function main() {
         }
     }
 
-    // Витринный заказ 305522 — уже на пункте выдачи
-    const atPickup = orders.find((o) => o.id === '305522')
-    const dnrDeparted = byKey.get('dnr-departed').wave
-    setHistory(atPickup, [
-        { status: 'assembling', at: dnrDeparted.closedAt, note: 'Приём в волну закрыт, заказ собирается' },
-        { status: 'in_transit', at: dnrDeparted.departedAt, note: 'Волна отправлена' },
-        { status: 'at_pickup', at: at(addDays(dnrDeparted.departureDate, 10), 9), note: 'Изменено администратором' },
-    ])
-
     const waves = [...byKey.values()].map(({ wave }) => ({ ...wave, currentWeightKg: roundTo(wave.currentWeightKg, 3) }))
 
     await db.write('waves', waves)
@@ -361,7 +302,7 @@ async function main() {
 
     console.log(`Волн: ${waves.length}, заказов: ${orders.length}`)
     waves.forEach((w) => console.log(`  ${w.id.padEnd(22)} ${w.status.padEnd(9)} ${w.currentWeightKg} кг`))
-    console.log('Демо-заказы: 204817 (подарок, волна перенесена, в пути), 305522 (на пункте выдачи), 411093 (набор «Север + Юг», цены скрыты)')
+    console.log('Демо-заказы: 204817 (подарок с открыткой), 305522 (в сборке), 411093 (набор «Север + Юг», цены скрыты)')
 }
 
 main().catch((error) => {

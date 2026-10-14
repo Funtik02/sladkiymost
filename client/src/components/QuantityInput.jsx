@@ -3,9 +3,6 @@ import { useState } from 'react'
 const MIN = 1
 const MAX = 99
 
-// Поле количества «− N +». Пока поле редактируется, допускаем пустое значение,
-// а при потере фокуса приводим к диапазону 1…99.
-// onIncrement/onDecrement — необязательные обработчики кнопок (в корзине это INCREMENT/DECREMENT)
 export default function QuantityInput({
     value,
     onChange,
@@ -15,7 +12,6 @@ export default function QuantityInput({
     disabled = false,
     small = false,
 }) {
-    // null — поле не редактируется, показываем value
     const [draft, setDraft] = useState(null)
 
     const commit = (raw) => {

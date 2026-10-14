@@ -1,4 +1,3 @@
-// Сообщение об ошибке загрузки с кнопкой «Повторить»
 export default function ErrorMessage({ error, onRetry, title = 'Не удалось загрузить данные' }) {
     return (
         <div className="state state--error" role="alert">

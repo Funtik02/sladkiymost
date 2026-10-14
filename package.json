@@ -5,8 +5,10 @@
   "description": "Сладкий мост: Якутия ⇄ Донбасс — маркетплейс кондитерских изделий с доставкой сборными волнами",
   "scripts": {
     "dev": "node scripts/dev.js",
+    "dev:phone": "node scripts/dev.js --lan",
     "seed": "npm --prefix server run seed",
     "images": "npm --prefix server run images",
+    "telegram": "npm --prefix server run telegram",
     "build": "npm --prefix client run build",
     "lint": "npm --prefix client run lint",
     "test": "node scripts/check-logic.mjs"

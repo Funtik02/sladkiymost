@@ -2,7 +2,6 @@ import { checkShelfLife, getDeliveryDays, SHELF_LIFE_RESERVE_DAYS } from '../uti
 import { formatDate } from '../utils/format'
 import { getMonthFromISO } from '../utils/season'
 
-// Предупреждение «не успеет доехать»: срок годности < срок доставки + 7 дней запаса
 export default function ShelfLifeWarning({ shelfLifeDays, waves }) {
     const check = checkShelfLife(shelfLifeDays, waves)
     if (check.nearestOk) return null

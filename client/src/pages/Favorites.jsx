@@ -14,14 +14,11 @@ export default function Favorites() {
     useDocumentTitle('Избранное')
     const { ids, keepOnly } = useFavorites()
 
-    // Загружаем один раз при открытии: на этой странице избранное только убывает,
-    // а убранные товары просто фильтруются при отрисовке — без повторной загрузки
     const { data, error, loading, reload } = useFetch(
         (signal) => Promise.all([getProductsByIds(ids, signal), getWavesLoad(signal)]),
         []
     )
 
-    // Товары, снятые с продажи, убираем из избранного
     useEffect(() => {
         if (data) keepOnly(data[0].map((p) => p.id))
     }, [data, keepOnly])
@@ -32,12 +29,12 @@ export default function Favorites() {
                 <h1 className="page-title">Избранное</h1>
                 <div className="state">
                     <p className="state__title">Здесь пока ничего нет</p>
-                    <p className="state__text">Нажимайте ♡ на карточках товаров, чтобы не потерять понравившиеся сладости.</p>
+                    <p className="state__text">Нажимайте на сердечко на карточках товаров, чтобы не потерять понравившиеся сладости.</p>
                     <div className="state__actions">
                         <Link to="/catalog/yakutia" className="btn btn--primary">
                             Сладости Якутии
                         </Link>
-                        <Link to="/catalog/donbass" className="btn btn--brown">
+                        <Link to="/catalog/donbass" className="btn btn--primary">
                             Сладости Донбасса
                         </Link>
                     </div>
@@ -46,7 +43,6 @@ export default function Favorites() {
         )
     }
 
-    // Порядок — как добавляли в избранное; удалённые из избранного сразу пропадают с экрана
     const products = data ? ids.map((id) => data[0].find((p) => p.id === id)).filter(Boolean) : []
 
     return (

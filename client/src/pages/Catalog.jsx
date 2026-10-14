@@ -22,7 +22,6 @@ export default function Catalog() {
 
     if (!region) return <NotFound />
 
-    // key: при переключении витрины состояние полей начинается с чистого листа
     return <CatalogView key={region.slug} region={region} />
 }
 
@@ -30,7 +29,6 @@ function CatalogView({ region }) {
     useDocumentTitle(region.title)
     const [searchParams, setSearchParams] = useSearchParams()
 
-    // Все фильтры живут в URL — ссылку можно отправить или открыть в новой вкладке
     const values = {
         category: searchParams.get('category') ?? '',
         manufacturer: searchParams.get('manufacturer') ?? '',
@@ -56,7 +54,6 @@ function CatalogView({ region }) {
         [setSearchParams]
     )
 
-    // Поиск и цены — с debounce 300 мс, чтобы не дёргать сервер на каждую букву
     const [search, setSearch] = useDebouncedParam(values.search, (v) => updateParam('search', v))
     const [minPrice, setMinPrice] = useDebouncedParam(values.minPrice, (v) => updateParam('minPrice', v))
     const [maxPrice, setMaxPrice] = useDebouncedParam(values.maxPrice, (v) => updateParam('maxPrice', v))

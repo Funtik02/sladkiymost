@@ -154,7 +154,7 @@ export default function AdminWaves() {
     const { call } = useAdmin()
     const { showToast } = useToast()
     const { data, error, loading, reload } = useFetch((signal) => call(getAdminWaves, signal), [])
-    const [pending, setPending] = useState(null) // { wave, action }
+    const [pending, setPending] = useState(null)
     const [busy, setBusy] = useState(false)
 
     if (loading && !data) return <Loader label="Загружаем волны…" />
@@ -166,7 +166,6 @@ export default function AdminWaves() {
             await call(updateWave, pending.wave.id, pending.action)
             showToast(ACTIONS[pending.action].done)
             setPending(null)
-            // Перенос и отправка меняют другие волны и заказы — перечитываем всё
             reload()
         } catch (err) {
             showToast(err.message, { type: 'error' })

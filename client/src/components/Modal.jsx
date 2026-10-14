@@ -4,8 +4,6 @@ import { CloseIcon } from './Icons'
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
-// Модальное окно: фокус внутри окна, Esc и клик по фону закрывают,
-// после закрытия фокус возвращается туда, где был.
 export default function Modal({ open, title, onClose, children, size = 'md', closable = true }) {
     const titleId = useId()
     const dialogRef = useRef(null)
@@ -35,7 +33,6 @@ export default function Modal({ open, title, onClose, children, size = 'md', clo
                 return
             }
 
-            // Держим Tab внутри окна
             if (event.key === 'Tab') {
                 const items = [...dialog.querySelectorAll(FOCUSABLE)]
                 if (items.length === 0) return

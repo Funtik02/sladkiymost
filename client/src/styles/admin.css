@@ -1,5 +1,3 @@
-/* Админка */
-
 .admin {
     padding-top: 24px;
     padding-bottom: 48px;
@@ -16,7 +14,7 @@
 .admin__title {
     font-size: 1.6rem;
     font-weight: 800;
-    color: var(--color-brown);
+    color: var(--color-blue);
 }
 
 .admin__tabs {
@@ -81,7 +79,6 @@
     align-self: center;
 }
 
-/* Таблицы: на узких экранах прокручиваются по горизонтали */
 .table-wrap {
     overflow-x: auto;
     border: 1px solid var(--color-border);
@@ -146,7 +143,6 @@
     color: var(--color-muted);
 }
 
-/* Аналитика */
 .stats {
     display: grid;
     gap: 16px;
@@ -172,7 +168,7 @@
 }
 
 .stat--wide {
-    border-top-color: var(--color-brown);
+    border-top-color: var(--color-gold);
 }
 
 .stat__label {
@@ -198,7 +194,6 @@
     display: inline;
 }
 
-/* Волны */
 .wave-create {
     margin-bottom: 24px;
 }
@@ -234,7 +229,7 @@
 }
 
 .admin-wave--closed {
-    border-left-color: var(--color-brown);
+    border-left-color: var(--color-gold-dark);
 }
 
 .admin-wave--departed,
@@ -277,7 +272,6 @@
     margin-top: 8px;
 }
 
-/* Вход и формы */
 .login {
     display: grid;
     gap: 16px;

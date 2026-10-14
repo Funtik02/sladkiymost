@@ -3,8 +3,6 @@ import { formatKg, formatPercent, formatRub } from '../utils/format'
 
 const MAX_DISCOUNT = DISCOUNT_TIERS[0].discount
 
-// Разбор стоимости доставки по формуле:
-// вес × 500 ₽ − скидка за заполненность + термоупаковка
 export default function DeliveryBreakdown({ calc, goodsTotal, goodsLabel = 'Товары' }) {
     const fillText = formatPercent(Math.min(1, calc.fillRatio))
 

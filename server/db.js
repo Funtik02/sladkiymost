@@ -1,11 +1,8 @@
 const fs = require('fs/promises')
 const path = require('path')
 
-// Все данные лежат в JSON-файлах server/data/*.json.
-// Другие модули не трогают файлы напрямую — только через read/write/transaction.
-
 const DATA_DIR = path.join(__dirname, 'data')
-const COLLECTIONS = ['products', 'waves', 'orders', 'pickup-points']
+const COLLECTIONS = ['products', 'waves', 'orders', 'pickup-points', 'users', 'sessions', 'carts']
 
 function filePath(name) {
     if (!COLLECTIONS.includes(name)) {
@@ -21,7 +18,6 @@ async function read(name) {
     try {
         raw = await fs.readFile(filePath(name), 'utf8')
     } catch (error) {
-        // Нет файла — значит коллекция пока пустая
         if (error.code === 'ENOENT') return []
         throw error
     }
@@ -42,9 +38,6 @@ async function write(name, data) {
     await fs.mkdir(DATA_DIR, { recursive: true })
     await fs.writeFile(tmp, `${JSON.stringify(data, null, 2)}\n`, 'utf8')
 
-    // Пишем во временный файл и подменяем им основной: читатель никогда
-    // не увидит наполовину записанный JSON. На Windows файл может быть
-    // кратковременно занят антивирусом — поэтому несколько попыток.
     for (let attempt = 0; ; attempt += 1) {
         try {
             await fs.rename(tmp, target)
@@ -62,9 +55,6 @@ async function write(name, data) {
     }
 }
 
-// Очередь транзакций: «прочитать → изменить → записать» выполняются строго
-// по одной. Без этого два одновременных заказа могли бы прочитать один и тот же
-// вес волны и затереть изменения друг друга.
 let queue = Promise.resolve()
 
 function transaction(fn) {

@@ -1,6 +1,5 @@
 import TextField from './TextField'
 
-// Выбор пункта выдачи в городе назначения
 export default function PickupSelect({ id, value, onChange, onBlur, error, points, city }) {
     const selected = points.find((p) => p.id === value)
 

@@ -24,7 +24,6 @@ export default function AdminLogin() {
         setError('')
 
         try {
-            // После входа компонент перерисуется и <Navigate> отправит в заказы
             await login(password)
         } catch (err) {
             setError(err.message)

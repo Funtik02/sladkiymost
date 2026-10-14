@@ -1,33 +1,35 @@
-/* Все цвета проекта — только здесь. В остальных файлах — var(--…). */
-
 :root {
-    /* Палитра из ТЗ */
-    --color-blue: #1F4E8C;        /* основной: шапка, кнопки, ссылки (Якутия, север) */
-    --color-blue-light: #E6EEF8;
-    --color-red: #C62F3A;         /* акценты: скидки, бейджи, счётчик корзины, важные предупреждения */
-    --color-red-light: #FBE9EA;
-    --color-brown: #6B4226;       /* шоколадный: заголовки, Донбасс, футер */
-    --color-brown-light: #F3EAE2;
-    --color-bg: #FBF8F4;          /* кремовый фон */
+    --color-blue: #2E6DA4;
+    --color-blue-light: #E6F3FC;
+    --color-red: #C23B3B;
+    --color-red-light: #FCEBEA;
+    --color-bg: #FDF8F1;
     --color-text: #2B1D14;
     --color-muted: #7A6A5E;
     --color-border: #E4DAD0;
     --color-success: #2E7D4F;
 
-    /* Производные оттенки (наведение, нажатие, поверхности) */
     --color-white: #FFFFFF;
-    --color-blue-dark: #173C6C;
-    --color-blue-mid: #3F6FAE;
-    --color-brown-dark: #4F3019;
-    --color-brown-mid: #8C5C3A;
-    --color-red-dark: #A3252F;
+    --color-blue-dark: #235683;
+    --color-blue-mid: #4F8FC8;
+    --color-red-dark: #9E2E2E;
     --color-success-light: #E5F2EA;
     --color-success-dark: #1F5E39;
     --color-warning-light: #FFF4DE;
     --color-warning-border: #E9C98A;
     --color-warning-text: #6B4A0E;
     --color-surface: #FFFFFF;
-    --color-surface-alt: #F6F1EB;
+    --color-surface-alt: #F8EEE2;
+    --color-cream: #F8E9D7;
+    --color-ice: #9FD3F3;
+    --color-turquoise: #00A7B5;
+    --color-gold: #F6C85F;
+    --color-gold-dark: #E0AE3C;
+    --color-gold-light: #FDF1D3;
+    --color-gold-text: #7A5300;
+    --color-caramel: #F28E8E;
+    --color-ink: #1B1F2A;
+    --gradient-brand: linear-gradient(90deg, #2E6DA4 0%, #9FD3F3 28%, #F8E9D7 50%, #F28E8E 72%, #C23B3B 100%);
     --color-overlay: rgba(43, 29, 20, 0.55);
     --color-white-soft: rgba(255, 255, 255, 0.82);
     --color-white-faint: rgba(255, 255, 255, 0.16);
@@ -36,17 +38,14 @@
     --color-shadow-strong: rgba(43, 29, 20, 0.16);
     --color-stripe: rgba(255, 255, 255, 0.45);
 
-    /* Акцент витрины: по умолчанию синий (север) */
     --accent: var(--color-blue);
     --accent-dark: var(--color-blue-dark);
     --accent-light: var(--color-blue-light);
 
-    /* Типографика */
     --font: 'Manrope', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     --font-size-sm: 0.875rem;
     --font-size-xs: 0.78rem;
 
-    /* Форма, тени, движение */
     --radius: 12px;
     --radius-sm: 8px;
     --radius-pill: 999px;
@@ -60,7 +59,6 @@
     --header-height: 68px;
 }
 
-/* Витрины: Якутия — синий акцент, Донбасс — коричневый */
 .theme-yakutia {
     --accent: var(--color-blue);
     --accent-dark: var(--color-blue-dark);
@@ -68,7 +66,7 @@
 }
 
 .theme-donbass {
-    --accent: var(--color-brown);
-    --accent-dark: var(--color-brown-dark);
-    --accent-light: var(--color-brown-light);
+    --accent: var(--color-blue);
+    --accent-dark: var(--color-blue-dark);
+    --accent-light: var(--color-blue-light);
 }

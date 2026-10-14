@@ -68,7 +68,6 @@ function GiftBoxBuilder({ products, wavesByDirection }) {
     if (counts['ДНР'] === 0) problems.push('Добавьте хотя бы одну сладость из Донбасса')
 
     const box = selected.length > 0 ? makeGiftBoxItem(selected, destination, 'preview') : null
-    // Ближайшая волна в регион назначения, с которой набор доедет
     const wave = box ? waves.find((w) => !getWaveBlocker([box], w)) : waves[0]
     const calc = box && wave ? calcDelivery({ items: [box], wave }) : null
     const arrival = wave ? getExpectedArrival(wave) : null

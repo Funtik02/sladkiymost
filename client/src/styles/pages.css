@@ -1,79 +1,70 @@
-/* Стили страниц */
-
-/* --- Главная ------------------------------------------------------------- */
-
 .hero {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(115deg, var(--color-blue-dark) 0%, var(--color-blue) 45%, var(--color-brown) 100%);
-    color: var(--color-white);
+    background: linear-gradient(90deg, #6FA8DA 0%, var(--color-cream) 50%, #E98F62 100%);
 }
 
-.hero::after {
-    content: '❄    ✿    ❄    ✿';
+.hero__image {
+    display: block;
+    width: 100%;
+    max-width: 1600px;
+    height: auto;
+    min-height: 200px;
+    max-height: 520px;
+    margin: 0 auto;
+    object-fit: cover;
+    object-position: center;
+}
+
+.hero-intro {
+    position: relative;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.hero-intro::before {
+    content: '';
     position: absolute;
-    right: -20px;
-    bottom: -30px;
-    font-size: 6rem;
-    letter-spacing: 0.2em;
-    opacity: 0.08;
-    white-space: nowrap;
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-brand);
 }
 
-.hero :focus-visible {
-    outline-color: var(--color-white);
+.hero-intro__inner {
+    display: grid;
+    gap: 20px;
+    align-items: center;
+    padding-top: 28px;
+    padding-bottom: 28px;
 }
 
-.hero__inner {
-    position: relative;
-    z-index: 1;
-    padding-top: 48px;
-    padding-bottom: 56px;
+@media (min-width: 960px) {
+    .hero-intro__inner {
+        grid-template-columns: 1fr auto;
+        gap: 40px;
+    }
 }
 
-.hero__eyebrow {
+.hero-intro__eyebrow {
     display: inline-block;
     padding: 4px 12px;
+    margin-bottom: 10px;
     border-radius: var(--radius-pill);
-    background: var(--color-white-faint);
+    background: var(--color-gold-light);
+    color: var(--color-blue-dark);
     font-size: var(--font-size-sm);
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-.hero__title {
-    max-width: 820px;
-    font-size: clamp(2rem, 1.3rem + 3.2vw, 3.4rem);
     font-weight: 800;
-    line-height: 1.08;
-    letter-spacing: -0.02em;
-    margin-bottom: 16px;
 }
 
-.hero__north,
-.hero__south {
-    white-space: nowrap;
+.hero-intro__text {
+    max-width: 720px;
+    font-size: 1.02rem;
 }
 
-.hero__text {
-    max-width: 680px;
-    font-size: 1.05rem;
-    color: var(--color-white-soft);
-    margin-bottom: 28px;
-}
-
-.hero__actions {
+.hero-intro__actions {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-}
-
-@media (min-width: 768px) {
-    .hero__inner {
-        padding-top: 72px;
-        padding-bottom: 80px;
-    }
 }
 
 .showcases {
@@ -117,12 +108,11 @@
 }
 
 .showcase--donbass {
-    background: linear-gradient(135deg, var(--color-brown-dark), var(--color-brown) 60%, var(--color-brown-mid));
+    background: linear-gradient(135deg, var(--color-blue), var(--color-blue-mid) 60%, var(--color-turquoise));
 }
 
-.showcase__emoji {
-    font-size: 2.2rem;
-    line-height: 1;
+.showcase__icon {
+    opacity: 0.9;
 }
 
 .showcase__title {
@@ -150,15 +140,6 @@
         grid-template-columns: 1fr 1fr;
         gap: 24px;
     }
-}
-
-.nearest-waves > :first-child {
-    --accent: var(--color-blue);
-}
-
-.nearest-waves > :last-child {
-    --accent: var(--color-brown);
-    --accent-light: var(--color-brown-light);
 }
 
 .steps {
@@ -197,21 +178,21 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--color-red);
-    color: var(--color-white);
+    background: var(--color-gold);
+    color: var(--color-blue-dark);
     font-size: var(--font-size-sm);
     font-weight: 800;
 }
 
 .step__icon {
-    font-size: 2rem;
+    color: var(--color-blue);
 }
 
 .step__title {
     margin: 8px 0 6px;
     font-size: 1.05rem;
     font-weight: 800;
-    color: var(--color-brown);
+    color: var(--color-blue);
 }
 
 .step__text {
@@ -223,8 +204,6 @@
     display: grid;
     gap: 32px;
 }
-
-/* --- Каталог ------------------------------------------------------------- */
 
 .catalog-hero {
     padding: 28px 0 24px;
@@ -252,8 +231,6 @@
     font-size: var(--font-size-sm);
     color: var(--color-muted);
 }
-
-/* --- Страница товара ----------------------------------------------------- */
 
 .product-page {
     display: grid;
@@ -302,7 +279,7 @@
     font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem);
     font-weight: 800;
     line-height: 1.2;
-    color: var(--color-brown);
+    color: var(--color-blue);
     margin: 4px 0 12px;
 }
 
@@ -372,8 +349,6 @@
     max-width: 820px;
     margin-top: 40px;
 }
-
-/* --- Корзина и оформление ------------------------------------------------ */
 
 .cart-layout,
 .checkout,
@@ -499,6 +474,11 @@
     margin: 6px 0 0 30px;
     font-size: var(--font-size-xs);
     color: var(--color-muted);
+}
+
+.motivator svg {
+    margin-right: 6px;
+    vertical-align: -4px;
 }
 
 .motivator {
@@ -696,7 +676,6 @@
     height: 44px;
     border-radius: var(--radius-sm);
     color: var(--color-white);
-    font-size: 1.3rem;
 }
 
 .design-option--north .design-option__swatch {
@@ -704,14 +683,12 @@
 }
 
 .design-option--south .design-option__swatch {
-    background: linear-gradient(135deg, var(--color-brown-dark), var(--color-brown-mid));
+    background: linear-gradient(135deg, var(--color-red-dark), var(--color-red) 55%, var(--color-caramel));
 }
 
 .design-option--bridge .design-option__swatch {
-    background: linear-gradient(135deg, var(--color-blue) 45%, var(--color-red) 50%, var(--color-brown) 55%);
+    background: linear-gradient(135deg, var(--color-blue) 45%, var(--color-ice) 50%, var(--color-red) 55%);
 }
-
-/* --- Успешный заказ ------------------------------------------------------ */
 
 .success {
     max-width: 760px;
@@ -738,7 +715,7 @@
 .success__title {
     font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.2rem);
     font-weight: 800;
-    color: var(--color-brown);
+    color: var(--color-blue);
     margin-bottom: 8px;
 }
 
@@ -764,8 +741,6 @@
     letter-spacing: 0.06em;
 }
 
-/* --- Отслеживание -------------------------------------------------------- */
-
 .track-form {
     display: grid;
     gap: 12px;
@@ -780,31 +755,6 @@
     .track-form .btn {
         margin-top: 28px;
     }
-}
-
-.recent-orders {
-    display: grid;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.recent-orders__link {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 16px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    background: var(--color-surface);
-    color: var(--color-text);
-    text-decoration: none;
-    transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-.recent-orders__link:hover {
-    border-color: var(--accent);
-    box-shadow: var(--shadow-sm);
-    color: var(--color-text);
 }
 
 .order-head {
@@ -866,8 +816,6 @@
     font-weight: 700;
     white-space: nowrap;
 }
-
-/* --- Набор «Север + Юг» -------------------------------------------------- */
 
 .giftbox .notice {
     margin-top: 16px;
@@ -1014,8 +962,6 @@
     font-weight: 700;
 }
 
-/* --- Дашборд волн -------------------------------------------------------- */
-
 .legend {
     display: flex;
     flex-wrap: wrap;
@@ -1121,8 +1067,6 @@
     color: var(--color-red-dark);
 }
 
-/* --- О проекте ----------------------------------------------------------- */
-
 .rules {
     display: grid;
     border: 1px solid var(--color-border);
@@ -1150,7 +1094,7 @@
 
 .rules dt {
     font-weight: 800;
-    color: var(--color-brown);
+    color: var(--color-blue);
 }
 
 .formula {
@@ -1170,4 +1114,127 @@
 
 .bullets li::marker {
     color: var(--color-red);
+}
+
+.auth {
+    max-width: 560px;
+}
+
+.auth__card {
+    display: grid;
+    gap: 20px;
+}
+
+.auth__tabs {
+    margin-bottom: 0;
+}
+
+.auth__tabs .segmented__option {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: 700;
+    color: inherit;
+}
+
+.auth__form {
+    display: grid;
+    gap: 14px;
+}
+
+.auth__note {
+    font-size: var(--font-size-sm);
+}
+
+.cabinet__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.cabinet__user {
+    color: var(--color-muted);
+}
+
+.cabinet__orders-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.cabinet__orders-head .segmented__option {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: 700;
+    color: inherit;
+}
+
+.cabinet__orders-head .segmented__option--active {
+    color: var(--color-white);
+}
+
+.my-orders {
+    display: grid;
+    gap: 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.my-order {
+    display: grid;
+    gap: 6px;
+}
+
+.my-order__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.my-order__title {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.my-order__meta,
+.my-order__items {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted);
+}
+
+.my-order__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 6px;
+    font-size: var(--font-size-sm);
+}
+
+.my-order__total {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.my-order__link {
+    justify-self: start;
+    font-weight: 700;
+}
+
+.account-note {
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border-radius: var(--radius-sm);
+    background: var(--color-blue-light);
+    font-size: var(--font-size-sm);
 }

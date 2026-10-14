@@ -2,7 +2,6 @@ const HttpError = require('./httpError')
 
 const REGIONS = ['Якутия', 'ДНР']
 
-// Регион можно передавать как есть или slug'ом из URL витрины
 const REGION_ALIASES = {
     якутия: 'Якутия',
     yakutia: 'Якутия',
@@ -24,7 +23,6 @@ function parseRegion(value) {
     return region
 }
 
-// Сколько единиц каждого товара продано (включая товары внутри подарочных наборов)
 function getSoldCounts(orders) {
     const sold = new Map()
     const add = (id, qty) => sold.set(id, (sold.get(id) ?? 0) + qty)
@@ -69,7 +67,6 @@ function filterProducts(products, orders, query) {
         throw new HttpError(400, `Неизвестная сортировка. Допустимо: ${SORTS.join(', ')}`)
     }
 
-    // Порядок в файле = порядок добавления, поэтому «новинки» — с конца
     const position = new Map(products.map((p, index) => [p.id, index]))
 
     let result = products.filter((p) => {
@@ -110,8 +107,6 @@ function filterProducts(products, orders, query) {
 function uniqueSorted(values) {
     return [...new Set(values)].sort((a, b) => a.localeCompare(b, 'ru'))
 }
-
-// --- Валидация товара из админки -------------------------------------------
 
 function requireString(body, field, label, min, max) {
     const value = typeof body[field] === 'string' ? body[field].trim() : ''

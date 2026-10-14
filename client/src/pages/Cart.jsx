@@ -9,6 +9,7 @@ import ErrorMessage from '../components/ErrorMessage'
 import Loader from '../components/Loader'
 import SeasonWarning from '../components/SeasonWarning'
 import WavePicker from '../components/WavePicker'
+import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import { useToast } from '../context/ToastContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -23,10 +24,42 @@ import {
 import { formatDate, formatKg, formatRub, pluralize } from '../utils/format'
 import { DIRECTIONS } from '../utils/regions'
 import { getWaveSeason } from '../utils/season'
+import ConsentCheckbox from '../components/ConsentCheckbox'
+import { TruckIcon } from '../components/Icons'
 
 export default function Cart() {
     useDocumentTitle('Корзина')
-    const { items } = useCart()
+    const { items, syncing } = useCart()
+    const { token } = useAuth()
+
+    if (syncing) {
+        return (
+            <div className="container section">
+                <h1 className="page-title">Корзина</h1>
+                <Loader label="Загружаем корзину из аккаунта…" />
+            </div>
+        )
+    }
+
+    if (!token) {
+        return (
+            <div className="container section">
+                <h1 className="page-title">Корзина</h1>
+                <div className="state">
+                    <p className="state__title">Войдите, чтобы пользоваться корзиной</p>
+                    <p className="state__text">Корзина хранится в личном кабинете — она будет ждать вас на любом устройстве.</p>
+                    <div className="state__actions">
+                        <Link to="/account?next=/cart" className="btn btn--primary">
+                            Войти
+                        </Link>
+                        <Link to="/account?mode=register&next=/cart" className="btn btn--ghost">
+                            Зарегистрироваться
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     if (items.length === 0) {
         return (
@@ -39,7 +72,7 @@ export default function Cart() {
                         <Link to="/catalog/yakutia" className="btn btn--primary">
                             Сладости Якутии
                         </Link>
-                        <Link to="/catalog/donbass" className="btn btn--brown">
+                        <Link to="/catalog/donbass" className="btn btn--primary">
                             Сладости Донбасса
                         </Link>
                         <Link to="/gift-box" className="btn btn--ghost">
@@ -54,7 +87,6 @@ export default function Cart() {
     return <CartView />
 }
 
-// Все id товаров корзины, включая содержимое наборов
 function collectProductIds(items) {
     const ids = items.flatMap((i) => (i.type === 'giftBox' ? i.contents.map((c) => c.productId) : [i.productId]))
     return [...new Set(ids)].sort()
@@ -68,7 +100,6 @@ function useCartSync() {
     const ids = collectProductIds(items)
     const sync = useFetch((signal) => getProductsByIds(ids, signal), [ids.join(',')])
 
-    // Сверяем «снимки» в корзине с актуальным каталогом: цены, вес, снятые с продажи товары
     useEffect(() => {
         if (!sync.data) return
 
@@ -94,7 +125,7 @@ function useCartSync() {
 
 function CartView() {
     const cart = useCart()
-    const { items, direction, waveId, thermoChosen, goodsTotal, weightKg, count, setWave, setThermo, clear } = cart
+    const { items, direction, waveId, thermoChosen, consent, goodsTotal, weightKg, count, setWave, setThermo, setConsent, clear } = cart
     const { showToast } = useToast()
     const navigate = useNavigate()
     const [confirmClear, setConfirmClear] = useState(false)
@@ -104,7 +135,6 @@ function CartView() {
 
     const waves = useFetch((signal) => getWaves(direction, signal), [direction])
 
-    // Выбранная волна закрылась или исчезла — снимаем выбор
     useEffect(() => {
         if (waves.data && waveId && !waves.data.some((w) => w.id === waveId)) {
             setWave(null)
@@ -123,6 +153,7 @@ function CartView() {
     let checkoutHint = ''
     if (!selectedWave) checkoutHint = 'Выберите волну отправки, чтобы оформить заказ'
     else if (blocker) checkoutHint = `Выбранная волна не подходит: ${blocker}`
+    else if (!consent) checkoutHint = 'Отметьте согласие на обработку персональных данных, чтобы оформить заказ'
 
     return (
         <div className="container section">
@@ -208,7 +239,7 @@ function CartView() {
 
                         {nextTier && (
                             <p className="motivator">
-                                <span aria-hidden="true">🚚 </span>
+                                <TruckIcon size={18} />
                                 Ещё {formatKg(nextTier.neededKg)} в волне — и{' '}
                                 {calc.discount > 0
                                     ? `скидка на доставку вырастет до ${nextTier.discount * 100} %`
@@ -218,6 +249,8 @@ function CartView() {
                         )}
 
                         {selectedWave && <SeasonWarning wave={selectedWave} tempSensitive={hasTempSensitive} />}
+
+                        <ConsentCheckbox checked={consent} onChange={setConsent} />
 
                         <button
                             type="button"

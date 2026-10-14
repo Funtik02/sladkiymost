@@ -2,7 +2,6 @@ import { getDeliveryDays, THERMO_PRICE } from '../utils/delivery'
 import { formatDate } from '../utils/format'
 import { getMonthFromISO, getSeason } from '../utils/season'
 
-// Сезонные условия для волны: термоупаковка зимой/летом, +7 дней в межсезонье
 export default function SeasonWarning({ wave, tempSensitive = false }) {
     if (!wave) return null
 

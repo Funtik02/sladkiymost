@@ -1,14 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Вафли «Степные» с орехом">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#F3EAE2"/>
-      <stop offset="1" stop-color="#E3CBB4"/>
-    </linearGradient>
-  </defs>
-  <rect width="400" height="300" fill="url(#bg)"/>
-  <text x="40" y="60" font-size="22" fill="#6B4226" opacity="0.18">✿</text><text x="352" y="48" font-size="28" fill="#6B4226" opacity="0.18">✿</text><text x="330" y="150" font-size="18" fill="#6B4226" opacity="0.18">✿</text><text x="62" y="170" font-size="16" fill="#6B4226" opacity="0.18">✿</text><text x="372" y="250" font-size="20" fill="#6B4226" opacity="0.18">✿</text><text x="24" y="262" font-size="18" fill="#6B4226" opacity="0.18">✿</text>
-  <rect x="16" y="16" rx="12" width="145" height="28" fill="#6B4226"/>
-  <text x="30" y="35" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#FFFFFF">Степная пчела</text>
-  <text x="200" y="168" text-anchor="middle" font-size="92">🧇</text>
-  <g font-family="Segoe UI, Arial, sans-serif"><text x="200" y="236" text-anchor="middle" font-size="19" font-weight="700" fill="#2B1D14">Вафли «Степные» с орехом</text></g>
+  <rect width="400" height="300" fill="#EAF4FC"/>
+  <g transform="translate(200 104) scale(1.15) translate(-200 -104)">
+    <ellipse cx="200" cy="174" rx="74" ry="8" fill="#2E6DA4" opacity="0.1"/>
+    <g transform="translate(200 100) rotate(-6)">
+      <rect x="-52" y="-36" width="124" height="100" rx="14" fill="#C98A35"/>
+      <rect x="-56" y="-44" width="124" height="100" rx="14" fill="#9A6440"/>
+      <rect x="-62" y="-50" width="124" height="100" rx="14" fill="#E3AA55"/>
+      <rect x="-57" y="-39" width="24" height="22" rx="4" fill="#C98A35"/><rect x="-57" y="-11" width="24" height="22" rx="4" fill="#C98A35"/><rect x="-57" y="17" width="24" height="22" rx="4" fill="#C98A35"/><rect x="-27" y="-39" width="24" height="22" rx="4" fill="#C98A35"/><rect x="-27" y="-11" width="24" height="22" rx="4" fill="#C98A35"/><rect x="-27" y="17" width="24" height="22" rx="4" fill="#C98A35"/><rect x="3" y="-39" width="24" height="22" rx="4" fill="#C98A35"/><rect x="3" y="-11" width="24" height="22" rx="4" fill="#C98A35"/><rect x="3" y="17" width="24" height="22" rx="4" fill="#C98A35"/><rect x="33" y="-39" width="24" height="22" rx="4" fill="#C98A35"/><rect x="33" y="-11" width="24" height="22" rx="4" fill="#C98A35"/><rect x="33" y="17" width="24" height="22" rx="4" fill="#C98A35"/>
+    </g>
+  </g>
+  <g font-family="Manrope, 'Segoe UI', Arial, sans-serif" font-size="18" font-weight="700" fill="#2B1D14"><text x="200" y="226" text-anchor="middle">Вафли «Степные» с орехом</text></g>
 </svg>

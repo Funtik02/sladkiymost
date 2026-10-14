@@ -3,14 +3,12 @@ const HttpError = require('./httpError')
 
 const TOKEN_TTL_MS = 8 * 60 * 60 * 1000
 
-// Токены живут в памяти процесса: после перезапуска сервера нужно войти заново
 const tokens = new Map()
 
 function getAdminPassword() {
     return process.env.ADMIN_PASSWORD || 'admin'
 }
 
-// Сравнение за постоянное время, чтобы пароль нельзя было подобрать по задержке ответа
 function safeEqual(a, b) {
     const hash = (value) => crypto.createHash('sha256').update(String(value)).digest()
     return crypto.timingSafeEqual(hash(a), hash(b))

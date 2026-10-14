@@ -7,8 +7,6 @@ const SORT_OPTIONS = [
     { value: 'new', label: 'Сначала новинки' },
 ]
 
-// Панель фильтров каталога. Значения приходят из URL; поиск и цены
-// обновляют URL с задержкой (debounce), остальные — сразу.
 export default function Filters({
     values,
     search,
@@ -137,7 +135,7 @@ export default function Filters({
                         checked={values.noTempSensitive}
                         onChange={(event) => onChange('noTempSensitive', event.target.checked ? '1' : '')}
                     />
-                    <span>Только без термочувствительных 🌡</span>
+                    <span>Только без термочувствительных</span>
                 </label>
                 {hasActive && (
                     <button type="button" className="btn btn--ghost btn--small" onClick={onReset}>

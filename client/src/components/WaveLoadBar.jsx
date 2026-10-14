@@ -1,7 +1,6 @@
 import { DISCOUNT_TIERS, MAX_WAVE_KG, MIN_WAVE_KG } from '../utils/delivery'
 import { formatKg } from '../utils/format'
 
-// Отметки шкалы: минимум партии и пороги скидок (150 кг → −20 %, 240 кг → −35 %)
 const MARKERS = [
     { kg: MIN_WAVE_KG, note: 'мин.' },
     ...[...DISCOUNT_TIERS].reverse().map((t) => ({ kg: t.fill * MAX_WAVE_KG, note: `−${t.discount * 100} %` })),
@@ -9,7 +8,6 @@ const MARKERS = [
 
 const pct = (kg, maxKg) => `${Math.min(100, (kg / maxKg) * 100)}%`
 
-// Шкала загрузки волны 0–300 кг. addedKg — вес текущего заказа, выделяется отдельно.
 export default function WaveLoadBar({ currentKg, addedKg = 0, maxKg = MAX_WAVE_KG, showScale = false, label }) {
     const total = currentKg + addedKg
     const overflow = total > maxKg

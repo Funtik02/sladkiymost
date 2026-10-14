@@ -1,16 +1,30 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { getMyOrders } from '../api/account'
+import ErrorMessage from '../components/ErrorMessage'
+import Loader from '../components/Loader'
+import OrderCard from '../components/OrderCard'
 import TextField from '../components/TextField'
+import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { formatDateTime } from '../utils/format'
-import { forgetRecentOrders, getRecentOrders } from '../utils/storage'
+import { useFetch } from '../hooks/useFetch'
 
 export default function Track() {
     useDocumentTitle('Отследить заказ')
     const navigate = useNavigate()
+    const { isLoggedIn, checking } = useAuth()
     const [number, setNumber] = useState('')
     const [error, setError] = useState('')
-    const [recent, setRecent] = useState(getRecentOrders)
+
+    if (checking) {
+        return (
+            <div className="container section narrow">
+                <Loader label="Проверяем вход…" />
+            </div>
+        )
+    }
+
+    if (!isLoggedIn) return <Navigate to="/account?reason=track&next=/track" replace />
 
     const handleSubmit = (event) => {
         event.preventDefault()
@@ -48,39 +62,39 @@ export default function Track() {
                 </button>
             </form>
 
-            <section className="section-sm" aria-labelledby="recent-title">
-                <h2 id="recent-title" className="section-subtitle">
-                    Ваши последние заказы
+            <section className="section-sm" aria-labelledby="my-orders-title">
+                <h2 id="my-orders-title" className="section-subtitle">
+                    Мои заказы
                 </h2>
-                {recent.length === 0 ? (
-                    <p className="muted">
-                        Здесь появятся номера заказов, оформленных или открытых на этом устройстве.
-                    </p>
-                ) : (
-                    <>
-                        <ul className="recent-orders">
-                            {recent.map((entry) => (
-                                <li key={entry.id}>
-                                    <Link to={`/order/${entry.id}`} className="recent-orders__link">
-                                        <strong>№{entry.id}</strong>
-                                        {entry.savedAt && <span className="muted">{formatDateTime(entry.savedAt)}</span>}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                        <button
-                            type="button"
-                            className="link-button"
-                            onClick={() => {
-                                forgetRecentOrders()
-                                setRecent([])
-                            }}
-                        >
-                            Очистить список
-                        </button>
-                    </>
-                )}
+                <MyOrders />
             </section>
         </div>
+    )
+}
+
+function MyOrders() {
+    const { token, forget } = useAuth()
+    const { data, error, loading, reload } = useFetch(
+        (signal) =>
+            getMyOrders(token, signal).catch((err) => {
+                if (err.status === 401) forget()
+                throw err
+            }),
+        [token]
+    )
+
+    if (loading && !data) return <Loader label="Загружаем ваши заказы…" />
+    if (error && !data) return <ErrorMessage error={error} onRetry={reload} />
+
+    if (data.length === 0) {
+        return <p className="muted">У вашего аккаунта пока нет заказов — здесь появятся все, что вы оформите.</p>
+    }
+
+    return (
+        <ul className="my-orders">
+            {data.map((order) => (
+                <OrderCard key={order.id} order={order} />
+            ))}
+        </ul>
     )
 }

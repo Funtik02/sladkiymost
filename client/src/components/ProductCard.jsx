@@ -10,7 +10,6 @@ import ProductPhoto from './ProductPhoto'
 import RegionBadge from './RegionBadge'
 import ThermoBadge from './ThermoBadge'
 
-// waves — открытые волны направления товара (для проверки срока годности)
 export default function ProductCard({ product, waves }) {
     const { addItem } = useCart()
     const favorites = useFavorites()

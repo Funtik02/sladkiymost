@@ -1,6 +1,3 @@
-// Общий fetch для всех запросов к API: JSON туда и обратно, единые ошибки.
-// Сервер отвечает ошибками вида { error: "сообщение" } — их текст и показываем.
-
 export class ApiError extends Error {
     constructor(message, status) {
         super(message)
@@ -31,7 +28,6 @@ export async function request(path, { method = 'GET', body, token, signal } = {}
     const data = await response.json().catch(() => null)
 
     if (!response.ok) {
-        // Прокси Vite отвечает 5xx без JSON, если API не запущен
         const fallback = response.status >= 500
             ? 'Сервер недоступен. Убедитесь, что он запущен, и попробуйте ещё раз'
             : `Ошибка запроса (${response.status})`
@@ -42,7 +38,6 @@ export async function request(path, { method = 'GET', body, token, signal } = {}
     return data
 }
 
-// { a: 1, b: '', c: null } → '?a=1' (пустые значения не передаём)
 export function toQuery(params) {
     const search = new URLSearchParams()
 
