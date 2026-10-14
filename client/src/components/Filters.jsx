@@ -33,7 +33,7 @@ export default function Filters({
                 <input
                     id="filter-search"
                     type="search"
-                    placeholder="Поиск: «брусника», «вафли», «ЯХК»…"
+                    placeholder="Поиск: «медовый», «вафли», «ЯХК»…"
                     value={search}
                     onChange={(event) => onSearchChange(event.target.value)}
                     autoComplete="off"

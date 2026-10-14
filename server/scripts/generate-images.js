@@ -3,6 +3,7 @@ const path = require('path')
 const db = require('../db')
 
 const OUT_DIR = path.join(__dirname, '..', 'public', 'images')
+const PHOTOS_DIR = path.join(__dirname, '..', 'assets', 'photos')
 
 const C = {
     choc: '#5A3420',
@@ -216,17 +217,51 @@ function render(product) {
 `
 }
 
+function renderPhoto(product, jpeg) {
+    const lines = wrap(product.name, 24, 2)
+
+    const title = lines
+        .map((line, i) => `<text x="20" y="${36 + i * 23}">${escape(line)}</text>`)
+        .join('')
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="${escape(product.name)}">
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <image width="400" height="300" preserveAspectRatio="xMidYMid slice" href="data:image/jpeg;base64,${jpeg.toString('base64')}"/>
+  <rect width="400" height="${lines.length === 1 ? 70 : 92}" fill="url(#fade)"/>
+  <g font-family="Manrope, 'Segoe UI', Arial, sans-serif" font-size="19" font-weight="700" fill="${C.text}">${title}</g>
+</svg>
+`
+}
+
+async function readPhoto(product) {
+    try {
+        return await fs.readFile(path.join(PHOTOS_DIR, `${product.id.toLowerCase()}.jpg`))
+    } catch (error) {
+        if (error.code === 'ENOENT') return null
+        throw error
+    }
+}
+
 async function main() {
     const products = await db.read('products')
     await fs.mkdir(OUT_DIR, { recursive: true })
 
     const local = products.filter((p) => /^[\w.-]+\.svg$/i.test(p.photo))
 
+    let photos = 0
+
     for (const product of local) {
-        await fs.writeFile(path.join(OUT_DIR, product.photo), render(product), 'utf8')
+        const jpeg = await readPhoto(product)
+        if (jpeg) photos += 1
+        await fs.writeFile(path.join(OUT_DIR, product.photo), jpeg ? renderPhoto(product, jpeg) : render(product), 'utf8')
     }
 
-    console.log(`Готово: ${local.length} изображений в public/images`)
+    console.log(`Готово: ${local.length} изображений в public/images, из них с фото: ${photos}`)
 }
 
 main().catch((error) => {

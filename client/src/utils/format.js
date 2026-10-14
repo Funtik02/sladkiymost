@@ -75,7 +75,7 @@ export function pluralize(n, [one, few, many]) {
     return many
 }
 
-const IMAGES_VERSION = 4
+const IMAGES_VERSION = 5
 
 export function photoUrl(photo) {
     if (!photo) return ''

@@ -3,7 +3,7 @@ import { readJSON, removeKey, writeJSON } from './storage.js'
 const RECENT_KEY = 'sweet-bridge:recent-searches'
 const RECENT_LIMIT = 5
 
-export const POPULAR_QUERIES = ['брусника', 'шоколад', 'вафли', 'торт', 'мармелад', 'зефир']
+export const POPULAR_QUERIES = ['торт', 'медовый', 'шоколад', 'вафли', 'мармелад', 'печенье']
 
 export const SITE_PAGES = [
     { to: '/catalog/yakutia', title: 'Сладости Якутии', keywords: 'якутия якутск север северные яхк каталог витрина' },

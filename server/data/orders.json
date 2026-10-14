@@ -6495,5 +6495,103 @@
     ],
     "postponements": [],
     "userId": "u_173a95cf-426a-47bc-bb32-2a32aee12afa"
+  },
+  {
+    "id": "830985",
+    "createdAt": "2026-10-14T08:42:58.433Z",
+    "direction": "YKT_DNR",
+    "waveId": "YKT_DNR-2026-10-24",
+    "scenario": "self",
+    "customer": {
+      "name": "Ньургун",
+      "phone": "+79627354777",
+      "email": "ndanilov40@gmail.com"
+    },
+    "recipient": null,
+    "gift": null,
+    "pickupPoint": {
+      "id": "DON-1",
+      "city": "Донецк",
+      "name": "ПВЗ «Центр»",
+      "address": "ул. Артёма, 50",
+      "hours": "ежедневно 9:00–20:00"
+    },
+    "payment": {
+      "method": "card",
+      "label": "Картой онлайн (имитация)",
+      "status": "paid"
+    },
+    "personalDataConsent": {
+      "given": true,
+      "at": "2026-10-14T08:42:58.433Z"
+    },
+    "items": [
+      {
+        "type": "product",
+        "productId": "YKT-010",
+        "name": "Торт «Сладкие грезы»",
+        "region": "Якутия",
+        "manufacturer": "ЯХК",
+        "weight_g": 700,
+        "price_rub": 1030,
+        "temp_sensitive": true,
+        "shelf_life_days": 45,
+        "qty": 1,
+        "lineTotal": 1030
+      },
+      {
+        "type": "product",
+        "productId": "YKT-008",
+        "name": "Торт «Молочный»",
+        "region": "Якутия",
+        "manufacturer": "ЯХК",
+        "weight_g": 500,
+        "price_rub": 750,
+        "temp_sensitive": true,
+        "shelf_life_days": 45,
+        "qty": 1,
+        "lineTotal": 750
+      },
+      {
+        "type": "product",
+        "productId": "YKT-004",
+        "name": "Торт «Бисквитно-кремовый»",
+        "region": "Якутия",
+        "manufacturer": "ЯХК",
+        "weight_g": 450,
+        "price_rub": 680,
+        "temp_sensitive": true,
+        "shelf_life_days": 45,
+        "qty": 1,
+        "lineTotal": 680
+      }
+    ],
+    "thermoChosen": false,
+    "totals": {
+      "goods": 2460,
+      "weightKg": 1.65,
+      "delivery": {
+        "tariffPerKg": 500,
+        "baseCost": 825,
+        "waveWeightAfterKg": 174.26,
+        "fillPercent": 58,
+        "discount": 0.2,
+        "discountAmount": 165,
+        "thermoRequired": false,
+        "thermoApplied": false,
+        "thermoCost": 0,
+        "total": 660
+      },
+      "total": 3120
+    },
+    "status": "accepted",
+    "statusHistory": [
+      {
+        "status": "accepted",
+        "at": "2026-10-14T08:42:58.433Z"
+      }
+    ],
+    "postponements": [],
+    "userId": "u_635466a6-73b8-4135-9b2d-a9b722e403d8"
   }
 ]

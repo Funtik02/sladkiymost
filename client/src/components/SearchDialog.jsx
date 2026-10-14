@@ -103,7 +103,7 @@ function SearchPanel({ onClose }) {
                     value={query}
                     onChange={onChange}
                     onKeyDown={onKeyDown}
-                    placeholder="Конфеты, брусника, вафли, Донецк…"
+                    placeholder="Торт, наполеон, вафли, Донецк…"
                     aria-label="Что ищем?"
                     aria-controls={listId}
                     aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}

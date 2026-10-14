@@ -72,7 +72,7 @@ export default function Search() {
                     type="search"
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
-                    placeholder="Конфеты, брусника, вафли, Донецк…"
+                    placeholder="Торт, наполеон, вафли, Донецк…"
                     aria-label="Что ищем?"
                     autoComplete="off"
                     autoFocus={!query}
